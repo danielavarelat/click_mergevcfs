@@ -1,0 +1,15 @@
+[paths]
+source =
+   click_mergevcfs
+   */site-packages/click_mergevcfs
+
+[run]
+include =
+    click_mergevcfs/*
+
+source =
+    click_mergevcfs
+    tests
+
+omit =
+    *click_mergevcfs/__main__.py
