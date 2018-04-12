@@ -1,16 +1,10 @@
 # Use base image
-FROM  python:3.6-jessie 
-
-# File Author / Maintainer
-LABEL Mantainer Joe Zhou <zhouy1@mskcc.org>
+FROM ubuntu:14.04
 
 # Define directories
 ENV OUTPUT_DIR /data
 ENV WORK_DIR /code
 ENV OPT_DIR /opt
-
-# For cookiecutter-testing
-ENV PROJECT click_mergevcfs
 
 # Mount the output volume as persistant
 VOLUME ${OUTPUT_DIR}
@@ -19,6 +13,8 @@ RUN \
     # Install Packages Dependencies
     apt-get update -yqq && \
     apt-get install -yqq \
+        zlib1g-dev \
+        pkg-config \
         curl \
         git \
         locales \
@@ -37,7 +33,29 @@ ENV LANG en_US.UTF-8
 # Install click_mergevcfs
 COPY . ${WORK_DIR}
 WORKDIR ${WORK_DIR}
-RUN pip install --editable .
+RUN \
+    pip install --upgrade setuptools && \
+    pip install --editable .
+
+# Install HTSlib
+RUN \
+    cd /tmp && \
+    wget "https://github.com/samtools/htslib/releases/download/1.8/htslib-1.8.tar.bz2" && \
+    tar -vxjf htslib-1.8.tar.bz2 && \
+    cd htslib-1.8 && \
+    ./configure --disable-bz2 --disable-lzma && \
+    make && \
+    make install
+
+# Install vcftools
+RUN \
+    cd /tmp && \
+    wget "https://github.com/vcftools/vcftools/releases/download/v0.1.15/vcftools-0.1.15.tar.gz" && \
+    tar xvf vcftools-0.1.15.tar.gz && \
+    cd vcftools-0.1.15 && \
+    ./configure && \
+    make && \
+    make install
 
 # Run command
-ENTRYPOINT ["/bin/bash", "docker-entrypoint.sh"]
+ENTRYPOINT ["click_mergevcfs"]

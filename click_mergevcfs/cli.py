@@ -18,14 +18,33 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 import click
 
 from click_mergevcfs import __version__
+from click_mergevcfs import commands
 
 @click.command()
-@click.option("--message", default="Hello World")
+@click.option(
+    "--vcf",
+    multiple=True,
+    help="Input vcf file"
+)
+@click.option(
+    "--outdir",
+    required=True,
+    help="Path to the output directory",
+    )
+@click.option(
+    "--no_flag",
+    is_flag=True,
+    default="False",
+    help="Disable Caveman Postprocessing flagging"
+)
 @click.version_option(version=__version__)
-def main(message):
+def main(vcf, outdir, no_flag):
     """Echo message and exit."""
-    click.echo(message)
-
+    commands.merge_vcfs(
+        vcf_list=vcf,
+        out_dir=outdir,
+        no_flag=no_flag
+    )
 
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter
