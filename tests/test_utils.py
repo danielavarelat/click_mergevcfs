@@ -6,6 +6,19 @@ import tarfile
 
 from click_mergevcfs import utils
 
+def test_parse_header(tmpdir):
+    tmp_out = join(str(tmpdir), "tmp.out")
+    with open(tmp_out, 'w') as fout:
+        fout.write("#CHROM\tPOS\tID")
+
+    callers = ['caller1', 'caller2']
+    utils.parse_header(tmp_out, callers)
+    expected_header = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tcaller1_NORMAL\tcaller1_TUMOR\tcaller2_NORMAL\tcaller2_TUMOR"
+
+    with open(tmp_out, 'r') as fin:
+        content = fin.read()
+    assert expected_header in content 
+
 
 def test_force_symlink(tmpdir):
     src = join(str(tmpdir), "src")

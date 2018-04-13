@@ -27,10 +27,15 @@ from click_mergevcfs import commands
     help="Input vcf file"
 )
 @click.option(
-    "--outdir",
+    "--out",
     required=True,
-    help="Path to the output directory",
+    help="Path to the output file",
     )
+@click.option(
+    "--reference",
+    required=True,
+    help="Genome reference file (ex. GRCH37D5)"
+)
 @click.option(
     "--no_flag",
     is_flag=True,
@@ -38,13 +43,9 @@ from click_mergevcfs import commands
     help="Disable Caveman Postprocessing flagging"
 )
 @click.version_option(version=__version__)
-def main(vcf, outdir, no_flag):
+def main(vcf, out):
     """Echo message and exit."""
-    commands.merge_vcfs(
-        vcf_list=vcf,
-        out_dir=outdir,
-        no_flag=no_flag
-    )
+    commands.merge_vcfs(vcf_list=vcf, out_file=out)
 
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter
