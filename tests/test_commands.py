@@ -36,20 +36,23 @@ def test_run(tmpdir):
     indels_vcf = [pindel_indels, mutect_indels, strelka_indels]
 
     # Test snps merge
-    commands.merge_vcfs(vcf_list=snps_vcf, out_dir=outdir)
     snps_merged = os.path.join(outdir, "merged.vcf")
+    commands.merge_snvs(vcf_list=snps_vcf, out_file=snps_merged)
 
     with open(snps_merged, "r") as f:
         content = f.read()
         assert EXPECTED_SNP in content
 
     # Test indels merge
-    commands.merge_vcfs(vcf_list=indels_vcf, out_dir=outdir)
     indels_merged = os.path.join(outdir, "merged.vcf")
+    commands.merge_snvs(vcf_list=indels_vcf, out_file=indels_merged)
 
     with open(indels_merged, "r") as f:
         content = f.read()
         assert EXPECTED_INDEL in content
     
+    # Test SVs merge
+    # commands.merge_svs(vcf_list=svs_vcf, out_dir)
+    # with open()
     # assert sum(1 for line in open(snps_merged)) == 926
     # assert sum(1 for line in open(indels_merged)) == 334

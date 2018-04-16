@@ -6,6 +6,10 @@ import tarfile
 
 from click_mergevcfs import utils
 
+# def test_tra2bnd(tmpdir):
+# TODO find a variant that is both in smoove and another tra caller. run tra2bnd on smoove and compare
+# TODO test if run tra2bnd on bnd vcf, the result is valid
+
 def test_parse_header(tmpdir):
     tmp_out = join(str(tmpdir), "tmp.out")
     with open(tmp_out, 'w') as fout:

@@ -14,6 +14,9 @@ RUN \
     apt-get update -yqq && \
     apt-get install -yqq \
         zlib1g-dev \
+        liblzma-dev \
+        samtools \
+        python-dev \
         pkg-config \
         curl \
         git \
@@ -29,13 +32,6 @@ RUN \
 
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
-
-# Install click_mergevcfs
-COPY . ${WORK_DIR}
-WORKDIR ${WORK_DIR}
-RUN \
-    pip install --upgrade setuptools && \
-    pip install --editable .
 
 # Install HTSlib
 RUN \
@@ -57,5 +53,20 @@ RUN \
     make && \
     make install
 
+# Environment variables needed for external installation of pysam
+ENV HTSLIB_LIBRARY_DIR /usr/local/lib
+ENV HTSLIB_INCLUDE_DIR /usr/local/include
+
+# Install click_mergevcfs
+COPY . ${WORK_DIR}
+WORKDIR ${WORK_DIR}
+RUN \
+    pip install --upgrade setuptools && \
+    pip install --editable .
+
+# move libhts.* to the correct pysam directory
+RUN \
+    mv /usr/local/lib/libhts.* /usr/local/lib/python2.7/dist-packages/pysam
+    
 # Run command
 ENTRYPOINT ["click_mergevcfs"]

@@ -19,6 +19,7 @@ import click
 
 from click_mergevcfs import __version__
 from click_mergevcfs import commands
+from click_mergevcfs import exceptions
 
 @click.command()
 @click.option(
@@ -32,6 +33,18 @@ from click_mergevcfs import commands
     help="Path to the output file",
     )
 @click.option(
+    "--snv",
+    required=False,
+    default="True",
+    help="The input vcfs contain snvs or indels",
+    )
+@click.option(
+    "--sv",
+    required=False,
+    default="False",
+    help="The input vcfs contain svs",
+    )
+@click.option(
     "--reference",
     required=True,
     help="Genome reference file (ex. GRCH37D5)"
@@ -43,9 +56,14 @@ from click_mergevcfs import commands
     help="Disable Caveman Postprocessing flagging"
 )
 @click.version_option(version=__version__)
-def main(vcf, out):
-    """Echo message and exit."""
-    commands.merge_vcfs(vcf_list=vcf, out_file=out)
+def main(vcf, out, snv, sv, reference, no_flag):
+    if snv and sv:
+        msg = "ERROR: --snv and --sv cannot be used at the same time."
+        raise exceptions.AmbiguousVariantTypeException(msg)
+    if snv:
+        commands.merge_snvs(vcf_list=vcf, out_file=out)
+    if sv:
+        commands.merge_svs(vcf_list=vcf, out_file=out, reference=reference)
 
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter

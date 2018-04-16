@@ -5,9 +5,9 @@ import tarfile
 import shutil
 import gzip
 import pysam
+import binascii
 
-def tra2bnd(in_vcf, reference):
-    out_vcf = ""
+def tra2bnd(in_vcf, out_vcf, reference):
     tra_vcf = pysam.VariantFile(in_vcf, 'r')
     bnd_vcf = pysam.VariantFile(out_vcf, 'w', header=tra_vcf.header)
     fasta = pysam.FastaFile(reference)
@@ -18,22 +18,27 @@ def tra2bnd(in_vcf, reference):
         bnd_record.alts = tuple([get_alt(tra_record.alts[0], bnd_record.ref, tra_record.chrom, tra_record.pos)])
         bnd_vcf.write(bnd_record)
 
-    def get_ref(reference, chrom, pos):
-        return reference.fetch(chrom, start=int(pos)-1, end=int(pos))
+    bnd_vcf.close()
 
-    def get_alt(alt, ref, chrom, pos):
-        if alt == "<DEL>":
-            return "{}[{}:{}[".format(ref, chrom, pos)
-        if alt == "<DUP>":
-            return "]{}:{}]{}".format(chrom, pos, ref)
-        
-        # if this a inversion
-        if alt[0] == '[':
-            return alt[:-1] + ref
-        if alt[-1] == ']':
-            return ref + alt[1:]
-        else:
-            return alt
+
+def get_ref(reference, chrom, pos):
+    return reference.fetch(chrom, start=int(pos)-1, end=int(pos))
+
+
+def get_alt(alt, ref, chrom, pos):
+    if alt == "<DEL>":
+        return "{}[{}:{}[".format(ref, chrom, pos)
+    if alt == "<DUP>":
+        return "]{}:{}]{}".format(chrom, pos, ref)
+    
+    # if this a inversion
+    if alt[0] == '[':
+        return alt[:-1] + ref
+    if alt[-1] == ']':
+        return ref + alt[1:]
+    else:
+        return alt
+
 
 def parse_header(vcf, callers):
     out_file = "out.tmp.vcf"
@@ -50,13 +55,26 @@ def parse_header(vcf, callers):
     os.remove(vcf)
     shutil.move(out_file, vcf)
 
+
 def get_caller(vcf):
     callers = ["mutect", "strelka", "caveman", "pindel"]
-    with gzip.open(vcf, 'r') as fin:
-        content = fin.read()
-        for c in callers:
-            if c in content:
-                return c
+    if is_gz_file(vcf):
+        with gzip.open(vcf, 'r') as fin:
+            content = fin.read()
+            for c in callers:
+                if c in content:
+                    return c
+    else:
+        with open(vcf, 'r') as fin:
+            content = fin.read()
+            for c in callers:
+                if c in content:
+                    return c
+
+
+def is_gz_file(f):
+    with open(f, 'rb') as fin:
+        return binascii.hexlify(fin.read(2)) == b'1f8b'
 
 
 def force_link(src, dst):
