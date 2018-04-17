@@ -30,9 +30,9 @@ docker run --rm -it --entrypoint ''  -v `pwd`:/test -w /test  \
 
 # move container coverage paths to local, see .coveragerc [paths] and this comment:
 # https://github.com/pytest-dev/pytest-cov/issues/146#issuecomment-272971136
-echo "combining container coverage..."
-command -v coverage > /dev/null 2>&1 || pip install coverage
-mv .coverage .coverage.tmp
-coverage combine --append
+# echo "combining container coverage..."
+# command -v coverage > /dev/null 2>&1 || pip install coverage
+# mv .coverage .coverage.tmp
+# coverage combine --append
 
 echo "tests finished..."

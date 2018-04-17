@@ -50,8 +50,9 @@ def merge_svs(vcf_list, out_file, reference):
         outdir_vcf_list.append(os.path.join(outdir, vcf_basename))
 
     cmd = ["vcf-merge"]
-    
+    callers = []
     for vcf in outdir_vcf_list:
+        callers.append(get_caller(vcf))
         out_vcf = vcf.split('vcf')[0] + "bnd.vcf.gz"
         tra2bnd(in_vcf=vcf, out_vcf=out_vcf, reference=reference)
         # Freshly index vcf just in case index file is older than vcf
@@ -62,5 +63,7 @@ def merge_svs(vcf_list, out_file, reference):
     subprocess.check_call(cmd, stdout=fout)
     fout.close()
     
+    # TODO parse output merged vcf header
+    parse_header(out_file, callers)
 
 # def post_process(merged_vcf):

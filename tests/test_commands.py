@@ -7,6 +7,7 @@ from .utils import TEST
 
 EXPECTED_SNP = "8\t29496762\t8421c1fa-505f-11e7-bd98-d60f982b8ef5\tT\tG"
 EXPECTED_INDEL = "8\t117864952\ta73b5158-505d-11e7-be92-c33fa51be26e\tT\tTAA"
+EXPECTED_SV = "1\t10\t.\tT\tT[1:10["
 
 def test_run(tmpdir):
     outdir = tmpdir.strpath
@@ -44,6 +45,8 @@ def test_run(tmpdir):
     # Test SVs merge
     svs_merged = os.path.join(outdir, "merged.svs.vcf")
     commands.merge_svs(vcf_list=svs_vcf, out_file=svs_merged, reference=reference)
-    # with open()
+    with open(svs_merged, 'r') as f:
+        content = f.read()
+        assert EXPECTED_SV in content
     # assert sum(1 for line in open(snps_merged)) == 926
     # assert sum(1 for line in open(indels_merged)) == 334

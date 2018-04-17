@@ -42,10 +42,12 @@ def get_alt(alt, ref, chrom, pos):
 
 
 def parse_header(vcf, callers):
+    # TODO maybe instead of {}_Normal and {}_Tumor, do {}_{sample name}
     out_file = "out.tmp.vcf"
     header = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT"
     for c in callers:
         header += "\t{}_NORMAL\t{}_TUMOR".format(c, c)
+    header += "\n"
     with open(out_file, "w") as fout:
         with open(vcf, "r") as fin:
             for line in fin:
@@ -58,7 +60,8 @@ def parse_header(vcf, callers):
 
 
 def get_caller(vcf):
-    callers = ["mutect", "strelka", "caveman", "pindel"]
+    # TODO finda a better way to get caller
+    callers = ["mutect", "strelka", "caveman", "pindel", "brass", "smoove", "svaba"]
     if is_gz_file(vcf):
         with gzip.open(vcf, 'r') as fin:
             content = fin.read()
