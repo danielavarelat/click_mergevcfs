@@ -3,30 +3,38 @@
 [![pypi badge][pypi_badge]][pypi_base]
 [![travis badge][travis_badge]][travis_base]
 [![codecov badge][codecov_badge]][codecov_base]
+[![docker badge][docker_badge]][docker_base]
+[![docker badge][automated_badge]][docker_base]
 
-Merge multiple vcf files and apply custom post-processing
+Merge vcfs files from multiple different callers.
 
-## Features
-
-* 📦 &nbsp; **Easy Installation**
+## Installation
 
         pip install click_mergevcfs
+        
+## Example
 
-* 🍉 &nbsp; **Usage Documentation**
+This tool is designed to be used with containers. Run click_mergevcfs with a container:
 
-        click_mergevcfs --help
+        docker run --volumes local/path:/data leukgen/click_mergevcfs \
+                --vcf /path/to/caller1.snvs.vcf \
+                --vcf /path/to/caller2.snvs.vcf \
+                --vcf /path/to/caller3.snvs.vcf \
+                --out /path/to/merged_output.vcf \
+                --reference /path/to/reference.fasta \
+                --snv \
 
-* 🐳 &nbsp; **Containers Support**
+## Options
 
-        # docker usage
-        docker run --volume /shared_fs:/shared_fs --interactive --tty \
-            click_mergevcfs-image
-            [click_mergevcfs options]
+| Option      | Description                                   |
+| ----------- | --------------------------------------------- |
+| --vcf       | Path to a input vcf file                      |
+| --out       | Path to the output file                       |
+| --snv       | If the input vcf files contain snvs or indels |
+| --sv        | If the input vcf files contain svs            |
+| --reference | Path to the reference fasta                   |
+| --no_flag   | Don't apply custom postprocessing             |
 
-        # singularity usage
-        singularity run --workdir /shared_fs/tmp --bind /shared_fs:/shared_fs \
-            click_mergevcfs-singularity-image-path
-            [click_mergevcfs options]
 
 ## Contributing
 
@@ -46,6 +54,9 @@ This package was created using [Cookiecutter] and the
 <!-- Badges -->
 [codecov_badge]: https://codecov.io/gh/leukgen/click_mergevcfs/branch/master/graph/badge.svg
 [codecov_base]: https://codecov.io/gh/leukgen/click_mergevcfs
+[automated_badge]: https://img.shields.io/docker/automated/leukgen/click_mergevcfs.svg
+[docker_base]: https://hub.docker.com/r/leukgen/click_mergevcfs
+[docker_badge]: https://img.shields.io/docker/build/leukgen/click_mergevcfs.svg
 [pypi_badge]: https://img.shields.io/pypi/v/click_mergevcfs.svg
 [pypi_base]: https://pypi.python.org/pypi/click_mergevcfs
 [travis_badge]: https://img.shields.io/travis/leukgen/click_mergevcfs.svg
