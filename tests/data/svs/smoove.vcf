@@ -1,0 +1,16 @@
+##fileformat=VCFv4.2
+##source=smoove
+##contig=<ID=1,assembly=GRCH37D5,length=249250621,species=HUMAN>
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant. (All sequence is on the plus strand and in the forward direction).">
+##INFO=<ID=STRANDS,Number=.,Type=String,Description="Strand orientation of the adjacency in BEDPE format (DEL:+-, DUP:-+, INV:++/--)">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=SU,Number=1,Type=Integer,Description="Number of pieces of evidence supporting the variant">
+##FORMAT=<ID=PE,Number=1,Type=Integer,Description="Number of paired-end reads supporting the variant">
+##FORMAT=<ID=SM,Number=1,Type=Integer,Description="Number of split reads supporting the variant">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE1_N	SAMPLE2_T
+1	10	.	N	<DEL>	.	.	SVTYPE=DEL;STRANDS=+-:65;SVLEN=5;END=15	GT:SU:PE:SM	./.:10:7:3	./.:7:10:3
+1	20	.	N	<DUP>	.	.	SVTYPE=DUP;STRANDS=-+:5;SVLEN=5;END=25	GT:SU:PE:SM	./.:10:7:3	./.:7:10:3
+1	30	.	N	<INV>	.	.	SVTYPE=INV;STRANDS=++:10:SVLEN=5;END=35	GT:SU:PE:SM	./.:10:7:3	./.:7:10:3
+1	40	.	N	N]1:40]	.	.	SVTYPE=INV;STRANDS=++:10:SVLEN=5;END=35	GT:SU:PE:SM	./.:10:7:3	./.:7:10:3

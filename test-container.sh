@@ -26,7 +26,7 @@ find . -name '__pycache__' -exec rm -rf {} +
 
 docker run --rm -it $TEST_IMAGE --version
 docker run --rm -it --entrypoint ''  -v `pwd`:/test -w /test  \
-    $TEST_IMAGE bash -c 'cp -r /test /tmp && cd /tmp/test/ && pip install pytest && pytest tests && cp .coverage /test'
+    $TEST_IMAGE bash -c 'cp -r /test /tmp && cd /tmp/test/ && pip install pytest && pytest tests' # && cp .coverage /test'
 
 # move container coverage paths to local, see .coveragerc [paths] and this comment:
 # https://github.com/pytest-dev/pytest-cov/issues/146#issuecomment-272971136

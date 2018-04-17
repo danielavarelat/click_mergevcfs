@@ -4,10 +4,11 @@ import os
 import tarfile
 import shutil
 import gzip
-import pysam
 import binascii
+import pysam
 
 def tra2bnd(in_vcf, out_vcf, reference):
+    # TODO add SVCLASS={DEL,DUP,INV}
     tra_vcf = pysam.VariantFile(in_vcf, 'r')
     bnd_vcf = pysam.VariantFile(out_vcf, 'w', header=tra_vcf.header)
     fasta = pysam.FastaFile(reference)
