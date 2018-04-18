@@ -34,19 +34,16 @@ from click_mergevcfs import exceptions
     )
 @click.option(
     "--snv",
-    required=False,
-    default="True",
+    is_flag=True,
     help="The input vcfs contain snvs or indels",
     )
 @click.option(
     "--sv",
-    required=False,
-    default="False",
+    is_flag=True,
     help="The input vcfs contain svs",
     )
 @click.option(
     "--reference",
-    required=True,
     help="Genome reference file (ex. GRCH37D5)"
 )
 @click.option(
@@ -64,6 +61,10 @@ def main(vcf, out, snv, sv, reference, no_flag):
         commands.merge_snvs(vcf_list=vcf, out_file=out)
     if sv:
         commands.merge_svs(vcf_list=vcf, out_file=out, reference=reference)
+    else:
+        msg = "ERROR: no variant type is specified in the options. Use either --snv or --sv."
+        raise exceptions.AmbiguousVariantTypeException(msg)
 
+        
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter

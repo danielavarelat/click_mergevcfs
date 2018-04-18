@@ -13,6 +13,7 @@ def merge_snvs(vcf_list, out_file):
     outdir_vcf_list = []
     for vcf in vcf_list:
         vcf_basename = os.path.basename(vcf)
+        # TODO if input directory and working directory are the same, shutil.copyfile would throw a "same file" error
         copyfile(vcf, os.path.join(outdir, vcf_basename))
         outdir_vcf_list.append(os.path.join(outdir, vcf_basename))
 
