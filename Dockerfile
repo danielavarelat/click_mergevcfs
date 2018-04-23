@@ -15,9 +15,12 @@ RUN \
     apt-get install -yqq \
         zlib1g-dev \
         liblzma-dev \
+        libbz2-dev \
+        bioperl \
         samtools \
         python-dev \
         pkg-config \
+        perl \
         curl \
         git \
         locales \
@@ -52,6 +55,51 @@ RUN \
     ./configure && \
     make && \
     make install
+
+
+# Install cgpVcf
+RUN \
+    cd /home && \
+    git clone https://github.com/cancerit/cgpVcf.git && \
+    cd cgpVcf && \
+    ./setup.sh /opt/ && \
+    export PATH=$PATH:/opt/bin && \
+    export PERL5LIB=/opt/lib/perl5
+
+# Update perl Build
+RUN \
+    cd /home && \
+    wget http://search.cpan.org/CPAN/authors/id/L/LE/LEONT/Module-Build-0.4224.tar.gz && \
+    tar -xvzf Module-Build-0.4224.tar.gz && \
+    cd Module-Build-0.4224 && \
+    perl Build.PL && \
+    ./Build && \
+    ./Build install
+
+# Install BIO::DB:HTS-2.10
+RUN \
+    cd /home && \
+    wget "http://search.cpan.org/CPAN/authors/id/A/AV/AVULLO/Bio-DB-HTS-2.10.tar.gz" && \
+    tar -xvzf Bio-DB-HTS-2.10.tar.gz && \
+    cd Bio-DB-HTS-2.10 && \
+    perl Build.PL --htslib /tmp/htslib-1.8 && \
+    ./Build && \
+    ./Build install && \
+    export PERL5LIB=$PERL5LIB:/home/Bio-DB-HTS-2.10/lib/Bio/DB/HTS/
+
+# Install cgpCaVEManPostProcessing
+RUN \
+    cd /home && \
+    git clone https://github.com/cancerit/cgpCaVEManPostProcessing.git && \
+    cd cgpCaVEManPostProcessing/ && \
+    perl /opt/bin/cpanm -v --mirror http://cpan.metacpan.org -l /opt/ --installdeps . && \
+    PERLROOT=/opt/lib/perl5 && \
+    export PERL5LIB="$PERLROOT" && \
+    export PATH="/opt/bin:$PATH" && \
+    perl Makefile.PL INSTALL_BASE=/opt/ && \
+    make && \
+    make install && \
+    export PERL5LIB=$PERL5LIB:/home/cgpCaVEManPostProcessing/lib
 
 # Environment variables needed for external installation of pysam
 ENV HTSLIB_LIBRARY_DIR /usr/local/lib

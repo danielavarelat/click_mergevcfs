@@ -1,9 +1,10 @@
 import os
 import pytest
+import shutil
 
 from click_mergevcfs import commands
 
-from .utils import TEST
+from .utils import TEST, which
 
 EXPECTED_SNP = "8\t29496762\t8421c1fa-505f-11e7-bd98-d60f982b8ef5\tT\tG"
 EXPECTED_INDEL = "8\t117864952\ta73b5158-505d-11e7-be92-c33fa51be26e\tT\tTAA"
@@ -21,16 +22,22 @@ def test_run(tmpdir):
     brass_svs = TEST['brass_svs']
     smoove_svs = TEST['smoove_svs']
     svaba_svs = TEST['svaba_svs']
+    normal_bam = TEST['normal_bam']
+    tumor_bam = TEST['tumor_bam']
+    bedFileLoc = TEST['bedFileLoc']
+    indelBed = TEST['indelBed']
+    annoBedLoc = TEST['annoBedLoc']
+    unmatchedVCFLoc = TEST['unmatchedVCFLoc']
 
     snps_vcf = [caveman_snvs, mutect_snvs, strelka_snvs]
     indels_vcf = [pindel_indels, mutect_indels, strelka_indels]
     svs_vcf = [brass_svs, smoove_svs, svaba_svs]
 
-    # Test snps merge
-    snps_merged = os.path.join(outdir, "merged.snps.vcf")
-    commands.merge_snvs(vcf_list=snps_vcf, out_file=snps_merged)
+    # Test snvs merge
+    snvs_merged = os.path.join(outdir, "merged.snps.vcf")
+    commands.merge_snvs(vcf_list=snps_vcf, out_file=snvs_merged)
 
-    with open(snps_merged, "r") as f:
+    with open(snvs_merged, "r") as f:
         content = f.read()
         assert EXPECTED_SNP in content
 
@@ -48,5 +55,29 @@ def test_run(tmpdir):
     with open(svs_merged, 'r') as f:
         content = f.read()
         assert EXPECTED_SV in content
-    # assert sum(1 for line in open(snps_merged)) == 926
-    # assert sum(1 for line in open(indels_merged)) == 334
+
+    # Test flagging
+    perl_path = which("perl")
+    print perl_path
+    ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'click_mergevcfs'))
+    flag_script = os.path.join(ROOT, "cgpFlagCaVEMan_debug.pl")
+    flagConfig = os.path.join(ROOT, "flag.vcf.custom.config.ini")
+    flagToVcfConfig = os.path.join(ROOT, "flag.to.vcf.custom.convert.ini")
+    flagged_vcf = os.path.join(outdir, "merged.flagged.vcf.gz")
+    reference_fai = reference + ".fai"
+
+    commands.caveman_postprocess(
+        perl_path=perl_path,
+        flag_script=flag_script,
+        in_vcf=snvs_merged,
+        out_vcf=flagged_vcf,
+        normal_bam=normal_bam,
+        tumor_bam=tumor_bam,
+        bedFileLoc=bedFileLoc,
+        indelBed=indelBed,
+        unmatchedVCFLoc=unmatchedVCFLoc,
+        reference=reference_fai,
+        flagConfig=flagConfig,
+        flagToVcfConfig=flagToVcfConfig,
+        annoBedLoc=annoBedLoc
+        )

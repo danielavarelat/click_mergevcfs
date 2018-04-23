@@ -1,7 +1,9 @@
-#!/ifs/work/leukgen/bin/perlbrew/0.74/perls/5.18.4/bin/perl
+# #!/ifs/work/leukgen/bin/perlbrew/0.74/perls/5.18.4/bin/perl
 
-eval 'exec /ifs/work/leukgen/bin/perlbrew/0.74/perls/5.18.4/bin/perl  -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
+# Some magic not sure what it is doing
+# eval 'exec /ifs/work/leukgen/bin/perlbrew/0.74/perls/5.18.4/bin/perl  -S $0 ${1+"$@"}'
+	# not running under some shell
+    # if 0; 
 
 ##########LICENCE##########
 # Copyright (c) 2014 Genome Research Ltd.
@@ -345,7 +347,7 @@ sub buildUnmatchedVCFFileListFromReference{
             }
             my $idx = $fileName.".tbi";
             croak ("Tabix file for unmatchedNormalVCF file $idx does not exist.\n") if(! -e $idx);
-            $umVcfTabix = new Tabix(-data => $fileName, -index => $idx);
+            # $umVcfTabix = new Tabix(-data => $fileName, -index => $idx);
           }
         }else{
           if($bedloc =~ /^(http|ftp)/) {

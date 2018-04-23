@@ -67,4 +67,26 @@ def merge_svs(vcf_list, out_file, reference):
     # TODO parse output merged vcf header
     parse_header(out_file, callers)
 
-# def post_process(merged_vcf):
+def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam, 
+                        tumor_bam, bedFileLoc, indelBed, unmatchedVCFLoc,
+                        reference, flagConfig, flagToVcfConfig, annoBedLoc):
+    cmd = [
+        perl_path,
+        flag_script,
+        '-i', in_vcf,
+        '-o', out_vcf,
+        '-s', 'HUMAN',
+        '-n', normal_bam,
+        '-m', tumor_bam,
+        '-b', bedFileLoc,
+        '-g', indelBed,
+        '-umv', unmatchedVCFLoc,
+        '-ref', reference,
+        '-t', 'pulldown',
+        '-c', flagConfig,
+        '-v', flagToVcfConfig,
+        '-ab', annoBedLoc,
+        '--verbose'
+    ]
+
+    subprocess.check_call(cmd)
