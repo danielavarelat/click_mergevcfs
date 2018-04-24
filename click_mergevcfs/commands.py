@@ -89,4 +89,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         '--verbose'
     ]
 
+    # Unicode to string
+    cmd = list(map(str, cmd))
+
     subprocess.check_call(cmd)

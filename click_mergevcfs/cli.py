@@ -23,6 +23,7 @@ from click_mergevcfs import commands
 from click_mergevcfs import exceptions
 from click_mergevcfs import utils
 
+
 @click.command()
 @click.option(
     "--vcf",
@@ -33,19 +34,19 @@ from click_mergevcfs import utils
     "--outdir",
     required=True,
     help="Path to the output file",
-    )
+)
 @click.option(
     "--snv",
     is_flag=True,
     default=False,
     help="The input vcfs contain snvs or indels",
-    )
+)
 @click.option(
     "--sv",
     is_flag=True,
     default=False,
     help="The input vcfs contain svs",
-    )
+)
 @click.option(
     "--reference",
     default=False,
@@ -58,39 +59,39 @@ from click_mergevcfs import utils
     help="Disable Caveman Postprocessing flagging"
 )
 @click.option(
-    "--normal_bam", '-n',
+    "--normal_bam",
     default=False,
     help="Path to the normal bam"
 )
 @click.option(
-    "--tumor_bam", '-m',
+    "--tumor_bam",
     default=False,
     help="Path to the tumor bam"
 )
 @click.option(
-    "--bedFileLoc", '-b',
+    "--bedFileLoc",
     default=False,
     help=("Path to a folder containing the centromeric, snp, hi sequence depth,"
           "and simple repeat sorted bed files(if required) i.e. the non annotation bed files."
           "Names of files will be taken from the config file.")
 )
 @click.option(
-    "--indelBed", '-g',
+    "--indelBed",
     default=False,
     help="A bed file containing germline indels to filter on"
 )
 @click.option(
-    "--unmatchedVCFLoc", '-umv',
+    "--unmatchedVCFLoc",
     default=False,
     help="Path to a directory containing the unmatched VCF normal files listed in the config file or unmatchedNormal.bed.gz(bed file is used in preference)."
 )
 @click.option(
-    "--annoBedLoc", '-ab',
+    "--annoBedLoc",
     default=False,
     help="Path to bed files containing annotatable regions and coding regions."
 )
 @click.version_option(version=__version__)
-def main(vcf, outdir, snv, sv, reference, no_flag, normal_bam, tumor_bam, bedFileLoc, indelBed, unmatchedVCFLoc, annoBedLoc):
+def main(vcf, outdir, snv, sv, reference, no_flag, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc, annobedloc):
     if snv and sv:
         msg = "ERROR: --snv and --sv cannot be used at the same time."
         raise exceptions.AmbiguousVariantTypeException(msg)
@@ -100,7 +101,8 @@ def main(vcf, outdir, snv, sv, reference, no_flag, normal_bam, tumor_bam, bedFil
         commands.merge_snvs(vcf_list=vcf, out_file=merged_vcf)
     elif sv:
         merged_vcf = join(outdir, "merged.sv.vcf.gz")
-        commands.merge_svs(vcf_list=vcf, out_file=merged_vcf, reference=reference)
+        commands.merge_svs(vcf_list=vcf, out_file=merged_vcf,
+                           reference=reference)
     else:
         msg = "ERROR: no variant type is specified in the options. Use either --snv or --sv."
         raise exceptions.AmbiguousVariantTypeException(msg)
@@ -114,23 +116,23 @@ def main(vcf, outdir, snv, sv, reference, no_flag, normal_bam, tumor_bam, bedFil
         flagConfig = join(ROOT, "flag.vcf.custom.config.ini")
         flagToVcfConfig = join(ROOT, "flag.to.vcf.custom.convert.ini")
         flagged_vcf = join(outdir, "merged.flagged.vcf.gz")
-        
+
         commands.caveman_postprocess(
             perl_path=perl_path,
             flag_script=flag_script,
             in_vcf=merged_vcf,
             out_vcf=flagged_vcf,
-            normal_bam=normal_bam, # -n
-            tumor_bam=tumor_bam, # -m
-            bedFileLoc=bedFileLoc, # -b
-            indelBed=indelBed, # -g
-            unmatchedVCFLoc=unmatchedVCFLoc, # -umv
+            normal_bam=normal_bam,  # -n
+            tumor_bam=tumor_bam,  # -m
+            bedFileLoc=bedfileloc,  # -b
+            indelBed=indelbed,  # -g
+            unmatchedVCFLoc=unmatchedvcfloc,  # -umv
             reference=reference,
             flagConfig=flagConfig,
             flagToVcfConfig=flagToVcfConfig,
-            annoBedLoc=annoBedLoc # -ab
-            )
+            annoBedLoc=annobedloc  # -ab
+        )
 
-        
+
 if __name__ == "__main__":
     main()  # pylint: disable=no-value-for-parameter
