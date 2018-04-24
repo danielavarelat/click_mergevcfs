@@ -26,6 +26,7 @@ from click_mergevcfs import utils
 
 @click.command()
 @click.option(
+    # TODO abspath
     "--vcf",
     multiple=True,
     help="Input vcf file"
@@ -97,12 +98,14 @@ def main(vcf, outdir, snv, sv, reference, no_flag, normal_bam, tumor_bam, bedfil
         raise exceptions.AmbiguousVariantTypeException(msg)
     elif snv:
         # TODO better file name with sample name
-        merged_vcf = join(outdir, "merged.snv.vcf.gz")
+        merged_vcf = join(outdir, "merged.snv.vcf")
         commands.merge_snvs(vcf_list=vcf, out_file=merged_vcf)
+        merged_vcf = merged_vcf + ".gz"
     elif sv:
-        merged_vcf = join(outdir, "merged.sv.vcf.gz")
+        merged_vcf = join(outdir, "merged.sv.vcf")
         commands.merge_svs(vcf_list=vcf, out_file=merged_vcf,
                            reference=reference)
+        merged_vcf = merged_vcf + ".gz"
     else:
         msg = "ERROR: no variant type is specified in the options. Use either --snv or --sv."
         raise exceptions.AmbiguousVariantTypeException(msg)

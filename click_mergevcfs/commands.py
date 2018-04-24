@@ -38,6 +38,8 @@ def merge_snvs(vcf_list, out_file):
 
     parse_header(out_file, callers)
 
+    subprocess.check_call(['bgzip', out_file])
+
 
 def merge_svs(vcf_list, out_file, reference):
     """For merging svs."""
@@ -67,6 +69,9 @@ def merge_svs(vcf_list, out_file, reference):
     # TODO parse output merged vcf header
     parse_header(out_file, callers)
 
+    subprocess.check_call(['bgzip', out_file])
+
+    
 def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam, 
                         tumor_bam, bedFileLoc, indelBed, unmatchedVCFLoc,
                         reference, flagConfig, flagToVcfConfig, annoBedLoc):
