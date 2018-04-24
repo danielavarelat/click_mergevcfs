@@ -347,7 +347,7 @@ sub buildUnmatchedVCFFileListFromReference{
             }
             my $idx = $fileName.".tbi";
             croak ("Tabix file for unmatchedNormalVCF file $idx does not exist.\n") if(! -e $idx);
-            # $umVcfTabix = new Tabix(-data => $fileName, -index => $idx);
+            $umVcfTabix = new Tabix(-data => $fileName, -index => $idx);
           }
         }else{
           if($bedloc =~ /^(http|ftp)/) {

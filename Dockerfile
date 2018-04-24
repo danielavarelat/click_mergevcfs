@@ -101,6 +101,23 @@ RUN \
     make install && \
     export PERL5LIB=$PERL5LIB:/home/cgpCaVEManPostProcessing/lib
 
+# Install Tabix
+RUN \
+    cd home && \
+    git clone https://github.com/samtools/tabix.git && \
+    cd tabix/ && \
+    make && \
+    cd perl && \
+    perl Makefile.PL && \
+    make && \
+    make test && \
+    make install && \
+    export PERL5LIB=$PERL5LIB:/home/tabix/perl/
+
+# PERL5LIB
+RUN \
+    export PERL5LIB=$PERL5LIB:/opt/lib/perl5/
+    
 # Environment variables needed for external installation of pysam
 ENV HTSLIB_LIBRARY_DIR /usr/local/lib
 ENV HTSLIB_INCLUDE_DIR /usr/local/include

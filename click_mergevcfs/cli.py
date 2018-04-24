@@ -30,40 +30,43 @@ from click_mergevcfs import utils
     help="Input vcf file"
 )
 @click.option(
-    "--out",
+    "--outdir",
     required=True,
     help="Path to the output file",
     )
 @click.option(
     "--snv",
     is_flag=True,
+    default=False,
     help="The input vcfs contain snvs or indels",
     )
 @click.option(
     "--sv",
     is_flag=True,
+    default=False,
     help="The input vcfs contain svs",
     )
 @click.option(
     "--reference",
+    default=False,
     help="Genome reference file (ex. GRCH37D5)"
 )
 @click.option(
     "--no_flag",
     is_flag=True,
-    default="False",
+    default=False,
     help="Disable Caveman Postprocessing flagging"
 )
 @click.version_option(version=__version__)
-def main(vcf, outdir, snv, sv, reference, no_flag, **kwargs):
+def main(vcf, outdir, snv, sv, reference, no_flag, *args, **kwargs):
     if snv and sv:
         msg = "ERROR: --snv and --sv cannot be used at the same time."
         raise exceptions.AmbiguousVariantTypeException(msg)
-    if snv:
+    elif snv:
         # TODO better file name with sample name
         merged_vcf = join(outdir, "merged.snv.vcf.gz")
         commands.merge_snvs(vcf_list=vcf, out_file=merged_vcf)
-    if sv:
+    elif sv:
         merged_vcf = join(outdir, "merged.sv.vcf.gz")
         commands.merge_svs(vcf_list=vcf, out_file=merged_vcf, reference=reference)
     else:

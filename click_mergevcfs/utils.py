@@ -76,6 +76,14 @@ def get_caller(vcf):
                     return c
 
 
+def which(pgm):
+    path = os.getenv('PATH')
+    for p in path.split(os.path.pathsep):
+        p = os.path.join(p, pgm)
+        if os.path.exists(p) and os.access(p, os.X_OK):
+            return p
+
+            
 def is_gz_file(f):
     with open(f, 'rb') as fin:
         return binascii.hexlify(fin.read(2)) == b'1f8b'
