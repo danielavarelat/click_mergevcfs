@@ -1,6 +1,7 @@
 import os
 import pytest
 import shutil
+import gzip
 
 from click_mergevcfs import commands
 
@@ -36,6 +37,14 @@ def test_run(tmpdir):
     # Test snvs merge
     snvs_merged = os.path.join(outdir, "merged.snvs.vcf.gz")
     commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged)
+    
+    with gzip.open(snvs_merged, "rb") as f:
+        content = f.read()
+        assert EXPECTED_SNP in content
+
+    # Test snvs merge, check the program handles properly if the output file is not gzipped
+    snvs_merged = os.path.join(outdir, "merged.snvs.vcf")
+    commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged)
 
     with open(snvs_merged, "r") as f:
         content = f.read()
@@ -45,14 +54,14 @@ def test_run(tmpdir):
     indels_merged = os.path.join(outdir, "merged.indels.vcf.gz")
     commands.merge_snvs(vcf_list=indels_vcf, out_file=indels_merged)
 
-    with open(indels_merged, "r") as f:
+    with gzip.open(indels_merged, "rb") as f:
         content = f.read()
         assert EXPECTED_INDEL in content
     
     # Test SVs merge
-    svs_merged = os.path.join(outdir, "merged.svs.vcf")
+    svs_merged = os.path.join(outdir, "merged.svs.vcf.gz")
     commands.merge_svs(vcf_list=svs_vcf, out_file=svs_merged, reference=reference)
-    with open(svs_merged, 'r') as f:
+    with gzip.open(svs_merged, 'rb') as f:
         content = f.read()
         assert EXPECTED_SV in content
 
