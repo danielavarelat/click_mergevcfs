@@ -57,8 +57,40 @@ from click_mergevcfs import utils
     default=False,
     help="Disable Caveman Postprocessing flagging"
 )
+@click.option(
+    "--normal_bam", '-n',
+    default=False,
+    help="Path to the normal bam"
+)
+@click.option(
+    "--tumor_bam", '-m',
+    default=False,
+    help="Path to the tumor bam"
+)
+@click.option(
+    "--bedFileLoc", '-b',
+    default=False,
+    help=("Path to a folder containing the centromeric, snp, hi sequence depth,"
+          "and simple repeat sorted bed files(if required) i.e. the non annotation bed files."
+          "Names of files will be taken from the config file.")
+)
+@click.option(
+    "--indelBed", '-g',
+    default=False,
+    help="A bed file containing germline indels to filter on"
+)
+@click.option(
+    "--unmatchedVCFLoc", '-umv',
+    default=False,
+    help="Path to a directory containing the unmatched VCF normal files listed in the config file or unmatchedNormal.bed.gz(bed file is used in preference)."
+)
+@click.option(
+    "--annoBedLoc", '-ab',
+    default=False,
+    help="Path to bed files containing annotatable regions and coding regions."
+)
 @click.version_option(version=__version__)
-def main(vcf, outdir, snv, sv, reference, no_flag, *args, **kwargs):
+def main(vcf, outdir, snv, sv, reference, no_flag, normal_bam, tumor_bam, bedFileLoc, indelBed, unmatchedVCFLoc, annoBedLoc):
     if snv and sv:
         msg = "ERROR: --snv and --sv cannot be used at the same time."
         raise exceptions.AmbiguousVariantTypeException(msg)
@@ -88,15 +120,15 @@ def main(vcf, outdir, snv, sv, reference, no_flag, *args, **kwargs):
             flag_script=flag_script,
             in_vcf=merged_vcf,
             out_vcf=flagged_vcf,
-            normal_bam=kwargs['normal_bam'],
-            tumor_bam=kwargs['tumor_bam'],
-            bedFileLoc=kwargs['bedFileLoc'],
-            indelBed=kwargs['indelBed'],
-            unmatchedVCFLoc=kwargs['unmatchedVCFLoc'],
+            normal_bam=normal_bam, # -n
+            tumor_bam=tumor_bam, # -m
+            bedFileLoc=bedFileLoc, # -b
+            indelBed=indelBed, # -g
+            unmatchedVCFLoc=unmatchedVCFLoc, # -umv
             reference=reference,
             flagConfig=flagConfig,
             flagToVcfConfig=flagToVcfConfig,
-            annoBedLoc=kwargs['annoBedLoc']
+            annoBedLoc=annoBedLoc # -ab
             )
 
         
