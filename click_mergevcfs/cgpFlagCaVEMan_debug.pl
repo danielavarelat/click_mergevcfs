@@ -229,7 +229,9 @@ sub main{
 		while (my $x=$vcf->next_data_array()){
       my $isInUmVCF = undef;
       #Clear the flags and SNP status before flagging.
-      $$x[6]='.'; #This resets all flags.
+      # Do not reset the existing flags as we want to preserve flags from other callers.
+	  # Author: Joe Zhou
+	  # $$x[6]='.'; #This resets all flags.
       #This ensures we haven't got any info flags (SNP) in existance...
       $$x[7]=$vcf->add_info_field($$x[7],'SNP'=>undef,'coding'=>undef,'ASRD'=>undef,'CLPM'=>undef,'ASMD'=>undef);
       #Files are sorted by chr/pos, so we can open the tabix index once per vcf file.

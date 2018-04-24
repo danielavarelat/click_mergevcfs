@@ -32,6 +32,7 @@ def merge_snvs(vcf_list, out_file):
         subprocess.check_call(['tabix', '-f', '-p', 'vcf', bgzip_vcf])
         cmd.extend([vcf])
 
+    cmd = list(map(str, cmd))
     fout = open(out_file, 'w')
     subprocess.check_call(cmd, stdout=fout)
     fout.close()
@@ -62,6 +63,7 @@ def merge_svs(vcf_list, out_file, reference):
         subprocess.check_call(['tabix', '-f', '-p', 'vcf', out_vcf])
         cmd.extend([out_vcf])
 
+    cmd = list(map(str, cmd))
     fout = open(out_file, 'w')
     subprocess.check_call(cmd, stdout=fout)
     fout.close()

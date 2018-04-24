@@ -29,20 +29,20 @@ def test_run(tmpdir):
     annoBedLoc = TEST['annoBedLoc']
     unmatchedVCFLoc = TEST['unmatchedVCFLoc']
 
-    snps_vcf = [caveman_snvs, mutect_snvs, strelka_snvs]
+    snvs_vcf = [caveman_snvs, mutect_snvs, strelka_snvs]
     indels_vcf = [pindel_indels, mutect_indels, strelka_indels]
     svs_vcf = [brass_svs, smoove_svs, svaba_svs]
 
     # Test snvs merge
-    snvs_merged = os.path.join(outdir, "merged.snps.vcf")
-    commands.merge_snvs(vcf_list=snps_vcf, out_file=snvs_merged)
+    snvs_merged = os.path.join(outdir, "merged.snvs.vcf.gz")
+    commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged)
 
     with open(snvs_merged, "r") as f:
         content = f.read()
         assert EXPECTED_SNP in content
 
     # Test indels merge
-    indels_merged = os.path.join(outdir, "merged.indels.vcf")
+    indels_merged = os.path.join(outdir, "merged.indels.vcf.gz")
     commands.merge_snvs(vcf_list=indels_vcf, out_file=indels_merged)
 
     with open(indels_merged, "r") as f:
