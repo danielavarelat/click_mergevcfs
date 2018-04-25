@@ -25,7 +25,7 @@ RUN \
         git \
         locales \
         python-pip \
-        wget && \
+        wget \
         vim && \
     apt-get clean && \
     \
