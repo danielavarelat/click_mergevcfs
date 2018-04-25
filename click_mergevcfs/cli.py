@@ -15,8 +15,8 @@ cause problems, the code will get executed twice:
 Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
-import click
 from os.path import join, dirname, abspath
+import click
 
 from click_mergevcfs import __version__
 from click_mergevcfs import commands
@@ -79,7 +79,8 @@ from click_mergevcfs import utils
     "--bedFileLoc",
     default=False,
     help=("Path to a folder containing the centromeric, snp, hi sequence depth,"
-          "and simple repeat sorted bed files(if required) i.e. the non annotation bed files."
+          "and simple repeat sorted bed files(if required) "
+          "i.e. the non annotation bed files."
           "Names of files will be taken from the config file.")
 )
 @click.option(
@@ -90,7 +91,9 @@ from click_mergevcfs import utils
 @click.option(
     "--unmatchedVCFLoc",
     default=False,
-    help="Path to a directory containing the unmatched VCF normal files listed in the config file or unmatchedNormal.bed.gz(bed file is used in preference)."
+    help=("Path to a directory containing the unmatched VCF normal files listed"
+          " in the config file or unmatchedNormal.bed.gz(bed file is used in"
+          "preference).")
 )
 @click.option(
     "--annoBedLoc",
@@ -98,22 +101,25 @@ from click_mergevcfs import utils
     help="Path to bed files containing annotatable regions and coding regions."
 )
 @click.version_option(version=__version__)
-def main(vcf, outdir, snv, indel, sv, reference, noflag, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc, annobedloc):
+def main(vcf, outdir, snv, indel, sv, reference, noflag, normal_bam, tumor_bam,
+         bedfileloc, indelbed, unmatchedvcfloc, annobedloc):
     if (snv or indel) and sv:
         msg = "ERROR: --snv and --sv cannot be used at the same time."
         raise exceptions.AmbiguousVariantTypeException(msg)
-    elif snv or indel:
+    elif snv != indel:
         # TODO better file name with sample name
-        merged_vcf = join(outdir, "merged.snv.vcf")
+        merged_vcf = join(
+            outdir,
+            "merged.{}.vcf.gz".format("snv" if snv else "indel")
+        )
         commands.merge_snvs(vcf_list=vcf, out_file=merged_vcf)
-        merged_vcf = merged_vcf + ".gz"
     elif sv:
-        merged_vcf = join(outdir, "merged.sv.vcf")
+        merged_vcf = join(outdir, "merged.sv.vcf.gz")
         commands.merge_svs(vcf_list=vcf, out_file=merged_vcf,
                            reference=reference)
-        merged_vcf = merged_vcf + ".gz"
     else:
-        msg = "ERROR: no variant type is specified in the options. Use either --snv or --sv."
+        msg = ("ERROR: snv={}, indel={}, sv={};"
+               "only one option is allowed.").format(snv, indel, sv)
         raise exceptions.AmbiguousVariantTypeException(msg)
 
     if not noflag:

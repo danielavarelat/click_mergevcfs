@@ -1,11 +1,9 @@
 import os
-import pytest
-import shutil
 import gzip
 
 from click_mergevcfs import commands
-
-from .utils import TEST, which
+from click_mergevcfs import utils
+from .utils import TEST
 
 EXPECTED_SNP = "8\t29496762\t8421c1fa-505f-11e7-bd98-d60f982b8ef5\tT\tG"
 EXPECTED_INDEL = "8\t117864952\ta73b5158-505d-11e7-be92-c33fa51be26e\tT\tTAA"
@@ -37,12 +35,13 @@ def test_run(tmpdir):
     # Test snvs merge
     snvs_merged = os.path.join(outdir, "merged.snvs.vcf.gz")
     commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged)
-    
+
     with gzip.open(snvs_merged, "rb") as f:
         content = f.read()
         assert EXPECTED_SNP in content
 
-    # Test snvs merge, check the program handles properly if the output file is not gzipped
+    # Test snvs merge, check the program handles properly
+    # if the output file is not gzipped
     snvs_merged = os.path.join(outdir, "merged.snvs.vcf")
     commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged)
 
@@ -57,18 +56,20 @@ def test_run(tmpdir):
     with gzip.open(indels_merged, "rb") as f:
         content = f.read()
         assert EXPECTED_INDEL in content
-    
+
     # Test SVs merge
     svs_merged = os.path.join(outdir, "merged.svs.vcf.gz")
-    commands.merge_svs(vcf_list=svs_vcf, out_file=svs_merged, reference=reference)
+    commands.merge_svs(vcf_list=svs_vcf, out_file=svs_merged,
+                       reference=reference)
     with gzip.open(svs_merged, 'rb') as f:
         content = f.read()
         assert EXPECTED_SV in content
 
     # Test flagging
-    perl_path = which("perl")
+    perl_path = utils.which("perl")
     print perl_path
-    ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'click_mergevcfs'))
+    ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
+                                        'click_mergevcfs'))
     flag_script = os.path.join(ROOT, "cgpFlagCaVEMan_debug.pl")
     flagConfig = os.path.join(ROOT, "flag.vcf.custom.config.ini")
     flagToVcfConfig = os.path.join(ROOT, "flag.to.vcf.custom.convert.ini")

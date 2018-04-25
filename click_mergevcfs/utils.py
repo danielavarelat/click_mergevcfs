@@ -16,7 +16,10 @@ def tra2bnd(in_vcf, out_vcf, reference):
     for tra_record in tra_vcf:
         bnd_record = tra_record.copy()
         bnd_record.ref = get_ref(fasta, tra_record.chrom, tra_record.pos)
-        bnd_record.alts = tuple([get_alt(tra_record.alts[0], bnd_record.ref, tra_record.chrom, tra_record.pos)])
+        bnd_record.alts = tuple(
+            [get_alt(tra_record.alts[0], bnd_record.ref, tra_record.chrom,
+                     tra_record.pos)]
+        )
         bnd_vcf.write(bnd_record)
 
     bnd_vcf.close()
@@ -31,14 +34,13 @@ def get_alt(alt, ref, chrom, pos):
         return "{}[{}:{}[".format(ref, chrom, pos)
     if alt == "<DUP>":
         return "]{}:{}]{}".format(chrom, pos, ref)
-    
+
     # if this a inversion
     if alt[0] == '[':
         return alt[:-1] + ref
     if alt[-1] == ']':
         return ref + alt[1:]
-    else:
-        return alt
+    return alt
 
 
 def parse_header(vcf, callers):
@@ -61,7 +63,8 @@ def parse_header(vcf, callers):
 
 def get_caller(vcf):
     # TODO finda a better way to get caller
-    callers = ["mutect", "strelka", "caveman", "pindel", "brass", "smoove", "svaba"]
+    callers = ["mutect", "strelka", "caveman", "pindel", "brass", "smoove",
+               "svaba"]
     if is_gz_file(vcf):
         with gzip.open(vcf, 'r') as fin:
             content = fin.read()
@@ -83,7 +86,7 @@ def which(pgm):
         if os.path.exists(p) and os.access(p, os.X_OK):
             return p
 
-            
+
 def is_gz_file(f):
     with open(f, 'rb') as fin:
         return binascii.hexlify(fin.read(2)) == b'1f8b'

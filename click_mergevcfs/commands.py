@@ -1,20 +1,22 @@
 import os
 import subprocess
-import click
-import utils
 from shutil import copyfile
 
-from click_mergevcfs.utils import get_caller, parse_header, tra2bnd
+from click_mergevcfs.utils import get_caller, parse_header, tra2bnd, is_gz_file
 
 def merge_snvs(vcf_list, out_file):
-    """For merging snvs and indels."""
+    """
+    For merging snvs and indels.
+    Output file format is determined based on the out_file filename.
+    """
     outdir = os.path.dirname(out_file)
 
     # copy input vcf to outdirs
     outdir_vcf_list = []
     for vcf in vcf_list:
         vcf_basename = os.path.basename(vcf)
-        # TODO if input directory and working directory are the same, shutil.copyfile would throw a "same file" error
+        # TODO if input directory and working directory are the same,
+        # shutil.copyfile would throw a "same file" error
         copyfile(vcf, os.path.join(outdir, vcf_basename))
         outdir_vcf_list.append(os.path.join(outdir, vcf_basename))
 
@@ -35,13 +37,15 @@ def merge_snvs(vcf_list, out_file):
 
     cmd = list(map(str, cmd))
     fout = open(out_file, 'w')
+    # Output of vcf-merge is not bgziped, regardless of the output filename
     subprocess.check_call(cmd, stdout=fout)
     fout.close()
 
     parse_header(out_file, callers)
 
-    # If user specify the output file should be gziped, but the outfile is not gzipped, we need to gzip the outfile
-    if out_file.endswith('.gz') and (not utils.is_gz_file(out_file)):
+    # If user specify the output file should be gziped, but the outfile is
+    # not gzipped, we need to gzip the outfile
+    if out_file.endswith('.gz') and (not is_gz_file(out_file)):
         corrected_filename = out_file.strip('.gz')
         os.rename(out_file, corrected_filename)
         subprocess.check_call(['bgzip', corrected_filename])
@@ -72,18 +76,19 @@ def merge_svs(vcf_list, out_file, reference):
     fout = open(out_file, 'w')
     subprocess.check_call(cmd, stdout=fout)
     fout.close()
-    
+
     # TODO parse output merged vcf header
     parse_header(out_file, callers)
 
-    # If user specify the output file should be gziped, but the outfile is not gzipped, we need to gzip the outfile 
-    if out_file.endswith('.gz') and (not utils.is_gz_file(out_file)):
+    # If user specify the output file should be gziped, but the outfile is not
+    # gzipped, we need to gzip the outfile
+    if out_file.endswith('.gz') and (not is_gz_file(out_file)):
         corrected_filename = out_file.strip('.gz')
         os.rename(out_file, corrected_filename)
         subprocess.check_call(['bgzip', corrected_filename])
 
-    
-def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam, 
+
+def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
                         tumor_bam, bedFileLoc, indelBed, unmatchedVCFLoc,
                         reference, flagConfig, flagToVcfConfig, annoBedLoc):
     cmd = [

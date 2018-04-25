@@ -1,5 +1,4 @@
 from os.path import join, dirname, abspath
-import os
 
 ROOT = abspath(dirname(__file__))
 
@@ -23,11 +22,3 @@ TEST = {
     "annoBedLoc": join(DATA, "annotable_region"),
     "unmatchedVCFLoc": join(DATA, "pon"),
 }
-
-
-def which(pgm):
-    path = os.getenv('PATH')
-    for p in path.split(os.path.pathsep):
-        p = os.path.join(p, pgm)
-        if os.path.exists(p) and os.access(p, os.X_OK):
-            return p
