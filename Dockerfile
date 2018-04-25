@@ -26,6 +26,7 @@ RUN \
         locales \
         python-pip \
         wget && \
+        vim && \
     apt-get clean && \
     \
     ## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
@@ -50,7 +51,7 @@ RUN \
 RUN \
     cd /tmp && \
     wget "https://github.com/vcftools/vcftools/releases/download/v0.1.15/vcftools-0.1.15.tar.gz" && \
-    tar xvf vcftools-0.1.15.tar.gz && \
+    tar -xvzf vcftools-0.1.15.tar.gz && \
     cd vcftools-0.1.15 && \
     ./configure && \
     make && \
@@ -60,8 +61,9 @@ RUN \
 # Install cgpVcf
 RUN \
     cd /home && \
-    git clone https://github.com/cancerit/cgpVcf.git && \
-    cd cgpVcf && \
+    wget "https://github.com/cancerit/cgpVcf/archive/v2.0.4.tar.gz" && \
+    tar -xvzf v2.0.4.tar.gz && \
+    cd cgpVcf-2.0.4 && \
     ./setup.sh /opt/ && \
     export PATH=$PATH:/opt/bin && \
     export PERL5LIB=/opt/lib/perl5
@@ -69,7 +71,7 @@ RUN \
 # Update perl Build
 RUN \
     cd /home && \
-    wget http://search.cpan.org/CPAN/authors/id/L/LE/LEONT/Module-Build-0.4224.tar.gz && \
+    wget "http://search.cpan.org/CPAN/authors/id/L/LE/LEONT/Module-Build-0.4224.tar.gz" && \
     tar -xvzf Module-Build-0.4224.tar.gz && \
     cd Module-Build-0.4224 && \
     perl Build.PL && \
@@ -90,8 +92,9 @@ RUN \
 # Install cgpCaVEManPostProcessing
 RUN \
     cd /home && \
-    git clone https://github.com/cancerit/cgpCaVEManPostProcessing.git && \
-    cd cgpCaVEManPostProcessing/ && \
+    wget "https://github.com/cancerit/cgpCaVEManPostProcessing/archive/1.8.0.tar.gz" && \
+    tar -xvzf 1.8.0.tar.gz && \
+    cd cgpCaVEManPostProcessing-1.8.0 && \
     perl /opt/bin/cpanm -v --mirror http://cpan.metacpan.org -l /opt/ --installdeps . && \
     PERLROOT=/opt/lib/perl5 && \
     export PERL5LIB="$PERLROOT" && \
@@ -114,8 +117,11 @@ RUN \
     export PERL5LIB=$PERL5LIB:/home/tabix/perl/
 
 # PERL5LIB
-ENV PERL5LIB=/opt/lib/perl5/
-    
+ENV PERL5LIB /opt/lib/perl5/
+
+# PATH
+ENV PATH "$PATH:/opt/bin"
+
 # Environment variables needed for external installation of pysam
 ENV HTSLIB_LIBRARY_DIR /usr/local/lib
 ENV HTSLIB_INCLUDE_DIR /usr/local/include
