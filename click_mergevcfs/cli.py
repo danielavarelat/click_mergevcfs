@@ -40,7 +40,13 @@ from click_mergevcfs import utils
     "--snv",
     is_flag=True,
     default=False,
-    help="The input vcfs contain snvs or indels",
+    help="The input vcfs contain snvs",
+)
+@click.option(
+    "--indel",
+    is_flag=True,
+    default=False,
+    help="The input vcfs contain indels",
 )
 @click.option(
     "--sv",
@@ -54,7 +60,7 @@ from click_mergevcfs import utils
     help="Genome reference file (ex. GRCH37D5)"
 )
 @click.option(
-    "--no_flag",
+    "--noflag",
     is_flag=True,
     default=False,
     help="Disable Caveman Postprocessing flagging"
@@ -92,11 +98,11 @@ from click_mergevcfs import utils
     help="Path to bed files containing annotatable regions and coding regions."
 )
 @click.version_option(version=__version__)
-def main(vcf, outdir, snv, sv, reference, no_flag, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc, annobedloc):
-    if snv and sv:
+def main(vcf, outdir, snv, indel, sv, reference, noflag, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc, annobedloc):
+    if (snv or indel) and sv:
         msg = "ERROR: --snv and --sv cannot be used at the same time."
         raise exceptions.AmbiguousVariantTypeException(msg)
-    elif snv:
+    elif snv or indel:
         # TODO better file name with sample name
         merged_vcf = join(outdir, "merged.snv.vcf")
         commands.merge_snvs(vcf_list=vcf, out_file=merged_vcf)
@@ -110,7 +116,7 @@ def main(vcf, outdir, snv, sv, reference, no_flag, normal_bam, tumor_bam, bedfil
         msg = "ERROR: no variant type is specified in the options. Use either --snv or --sv."
         raise exceptions.AmbiguousVariantTypeException(msg)
 
-    if not no_flag:
+    if not noflag:
         # TODO check parameter
 
         perl_path = utils.which('perl')
