@@ -16,6 +16,8 @@ RUN \
         zlib1g-dev \
         liblzma-dev \
         libbz2-dev \
+        libncurses5-dev \
+        libcurl4-openssl-dev \
         bioperl \
         samtools \
         python-dev \
@@ -64,9 +66,8 @@ RUN \
     wget "https://github.com/cancerit/cgpVcf/archive/v2.0.4.tar.gz" && \
     tar -xvzf v2.0.4.tar.gz && \
     cd cgpVcf-2.0.4 && \
-    ./setup.sh /opt/ && \
-    export PATH=$PATH:/opt/bin && \
-    export PERL5LIB=/opt/lib/perl5
+    sed -i 's/make test/ /g' setup.sh && \
+    ./setup.sh /opt/
 
 # Update perl Build
 RUN \
