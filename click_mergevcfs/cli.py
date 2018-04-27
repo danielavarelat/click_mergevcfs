@@ -16,6 +16,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 from os.path import join, dirname, abspath
+import os
 import click
 
 from click_mergevcfs import __version__
@@ -66,6 +67,11 @@ from click_mergevcfs import utils
     help="Disable Caveman Postprocessing flagging"
 )
 @click.option(
+    "--temp",
+    default=os.environ['TEMP'],
+    help="Disable Caveman Postprocessing flagging"
+)
+@click.option(
     "--normal_bam",
     default=False,
     help="Path to the normal bam"
@@ -101,8 +107,8 @@ from click_mergevcfs import utils
     help="Path to bed files containing annotatable regions and coding regions."
 )
 @click.version_option(version=__version__)
-def main(vcf, outdir, snv, indel, sv, reference, noflag, normal_bam, tumor_bam,
-         bedfileloc, indelbed, unmatchedvcfloc, annobedloc):
+def main(vcf, outdir, snv, indel, sv, reference, noflag, temp, normal_bam, 
+         tumor_bam, bedfileloc, indelbed, unmatchedvcfloc, annobedloc):
     if (snv or indel) and sv:
         msg = "ERROR: --snv and --sv cannot be used at the same time."
         raise exceptions.AmbiguousVariantTypeException(msg)
@@ -112,11 +118,11 @@ def main(vcf, outdir, snv, indel, sv, reference, noflag, normal_bam, tumor_bam,
             outdir,
             "merged.{}.vcf.gz".format("snv" if snv else "indel")
         )
-        commands.merge_snvs(vcf_list=vcf, out_file=merged_vcf)
+        commands.merge_snvs(vcf_list=vcf, out_file=merged_vcf, working_dir=temp)
     elif sv:
         merged_vcf = join(outdir, "merged.sv.vcf.gz")
         commands.merge_svs(vcf_list=vcf, out_file=merged_vcf,
-                           reference=reference)
+                           reference=reference, working_dir=temp)
     else:
         msg = ("ERROR: snv={}, indel={}, sv={};"
                "only one option is allowed.").format(snv, indel, sv)

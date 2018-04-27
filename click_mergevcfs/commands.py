@@ -1,29 +1,31 @@
 import os
 import subprocess
+import logging
+
 from shutil import copyfile
 
 from click_mergevcfs.utils import get_caller, parse_header, tra2bnd, is_gz_file
 
-def merge_snvs(vcf_list, out_file):
+def merge_snvs(vcf_list, out_file, working_dir):
     """
     For merging snvs and indels.
     Output file format is determined based on the out_file filename.
     """
-    outdir = os.path.dirname(out_file)
+    logging.info("INFO: Using {} as temp directory.".format(working_dir))
 
-    # copy input vcf to outdirs
-    outdir_vcf_list = []
+    # copy input vcf to working_dir
+    working_dir_vcf_list = []
     for vcf in vcf_list:
         vcf_basename = os.path.basename(vcf)
         # TODO if input directory and working directory are the same,
         # shutil.copyfile would throw a "same file" error
-        copyfile(vcf, os.path.join(outdir, vcf_basename))
-        outdir_vcf_list.append(os.path.join(outdir, vcf_basename))
+        copyfile(vcf, os.path.join(working_dir, vcf_basename))
+        working_dir_vcf_list.append(os.path.join(working_dir, vcf_basename))
 
     cmd = ["vcf-merge"]
 
     callers = []
-    for vcf in outdir_vcf_list:
+    for vcf in working_dir_vcf_list:
         callers.append(get_caller(vcf))
         bgzip_vcf = ""
         if not vcf.endswith('.gz'):
@@ -51,20 +53,20 @@ def merge_snvs(vcf_list, out_file):
         subprocess.check_call(['bgzip', corrected_filename])
 
 
-def merge_svs(vcf_list, out_file, reference):
+def merge_svs(vcf_list, out_file, reference, working_dir):
     """For merging svs."""
-    outdir = os.path.dirname(out_file)
+    logging.info("INFO: Using {} as temp directory.".format(working_dir))
 
     # copy input vcf to outdirs
-    outdir_vcf_list = []
+    working_dir_vcf_list = []
     for vcf in vcf_list:
         vcf_basename = os.path.basename(vcf)
-        copyfile(vcf, os.path.join(outdir, vcf_basename))
-        outdir_vcf_list.append(os.path.join(outdir, vcf_basename))
+        copyfile(vcf, os.path.join(working_dir, vcf_basename))
+        working_dir_vcf_list.append(os.path.join(working_dir, vcf_basename))
 
     cmd = ["vcf-merge"]
     callers = []
-    for vcf in outdir_vcf_list:
+    for vcf in working_dir_vcf_list:
         callers.append(get_caller(vcf))
         out_vcf = vcf.split('vcf')[0] + "bnd.vcf.gz"
         tra2bnd(in_vcf=vcf, out_vcf=out_vcf, reference=reference)
