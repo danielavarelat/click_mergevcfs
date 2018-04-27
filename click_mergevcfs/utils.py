@@ -7,6 +7,72 @@ import gzip
 import binascii
 import pysam
 
+def get_caller(in_vcf):
+    vcf = None
+    if is_gz_file(in_vcf):
+        vcf = gzip.open(in_vcf, 'rb')
+    else:
+        vcf = open(in_vcf, 'r')
+    # Potential problem if file is too big
+    content = vcf.read().lower()
+    # Caveman files may contain 'pindel.germline.bed', Temporary fix
+    content = content.replace('pindel.germline.bed','pindl.germline.bed')
+
+    callers = ['mutect', 'strelka', 'mutect', 'caveman', 'pindel', 'brass']
+    caller = set([c for c in callers if c in content])
+    
+    if len(caller) != 1:
+        print "Unable to determine caller of a vcf: None or 1+ callers found."
+        return False
+    print "{} is produced by {}".format(in_vcf, list(caller)[0])
+    return list(caller)[0]
+
+
+def add_PASSED_field(in_vcf, out_vcf):
+    # PASSED as string or flags?
+    # see logic of merging INFO fields 
+    # https: // github.com/vcftools/vcftools/blob/490848f7865abbb4b436ca09381ea7912a363fe3/src/perl/vcf-merge  # L441
+    i_vcf = pysam.VariantFile(in_vcf, 'r')
+    new_header = i_vcf.header.copy()
+    new_header.info.add('PASSED', '.', 'String', "this variants passed which caller(s)")
+    i_vcf.header.info.add('PASSED', '.', 'String', "this variants passed which caller(s)")
+
+    o_vcf = pysam.VariantFile(out_vcf, 'w', header=new_header)
+
+    caller = get_caller(in_vcf)
+
+    for record in i_vcf:
+        new_rec = record.copy()
+        if record.filter[0] == 'PASS':
+            #record.info['PASSED'] = caller
+            new_rec.info['PASSED'] = caller
+        o_vcf.write(new_rec)
+
+    o_vcf.close()
+
+
+def decompose_multiallelic_record(in_vcf, out_vcf):
+    i_vcf = pysam.VariantFile(in_vcf, 'r')
+    o_vcf = pysam.VariantFile(out_vcf, 'w', header=i_vcf.header)
+
+    for record in i_vcf:
+        number_events = len(record.alts)
+        if number_events > 1:
+            for i in range(0, number_events):
+                new_rec = record.copy()
+                new_rec.alts = tuple([record.alts[i]])
+                # Mutliallic sites GT are ex. 0/1/2, which causes error later
+                # Needs to change to ./.
+                genotypes = list(record.samples)
+                for g in genotypes:
+                    new_rec.samples[g]['GT'] = (None, None)
+                o_vcf.write(new_rec)
+        else:
+            o_vcf.write(record)
+
+    o_vcf.close()
+
+
 def tra2bnd(in_vcf, out_vcf, reference):
     # TODO add SVCLASS={DEL,DUP,INV}
     tra_vcf = pysam.VariantFile(in_vcf, 'r')
@@ -59,24 +125,6 @@ def parse_header(vcf, callers):
                     fout.write(line)
     os.remove(vcf)
     shutil.move(out_file, vcf)
-
-
-def get_caller(vcf):
-    # TODO finda a better way to get caller
-    callers = ["mutect", "strelka", "caveman", "pindel", "brass", "smoove",
-               "svaba"]
-    if is_gz_file(vcf):
-        with gzip.open(vcf, 'r') as fin:
-            content = fin.read()
-            for c in callers:
-                if c in content:
-                    return c
-    else:
-        with open(vcf, 'r') as fin:
-            content = fin.read()
-            for c in callers:
-                if c in content:
-                    return c
 
 
 def which(pgm):

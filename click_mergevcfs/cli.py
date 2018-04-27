@@ -17,6 +17,7 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 
 from os.path import join, dirname, abspath
 import os
+import tempfile
 import click
 
 from click_mergevcfs import __version__
@@ -35,7 +36,7 @@ from click_mergevcfs import utils
 @click.option(
     "--outdir",
     required=True,
-    help="Path to the output file",
+    help="Path to the output directory",
 )
 @click.option(
     "--snv",
@@ -61,15 +62,21 @@ from click_mergevcfs import utils
     help="Genome reference file (ex. GRCH37D5)"
 )
 @click.option(
-    "--noflag",
+    "--caveman_flag",
     is_flag=True,
     default=False,
-    help="Disable Caveman Postprocessing flagging"
+    help="Apply Caveman Postprocessing flagging to merged vcf"
+)
+@click.option(
+    "--pindel_flag",
+    is_flag=True,
+    default=False,
+    help="Apply Pindel Postprocessing flagging to merged vcf"
 )
 @click.option(
     "--temp",
-    default=os.environ['TEMP'],
-    help="Disable Caveman Postprocessing flagging"
+    default=tempfile.mkdtemp(),
+    help="If specified, put all intermediate files in this directory."
 )
 @click.option(
     "--normal_bam",
@@ -107,12 +114,18 @@ from click_mergevcfs import utils
     help="Path to bed files containing annotatable regions and coding regions."
 )
 @click.version_option(version=__version__)
-def main(vcf, outdir, snv, indel, sv, reference, noflag, temp, normal_bam, 
+def main(vcf, outdir, snv, indel, sv, reference, caveman_flag, temp, normal_bam,
          tumor_bam, bedfileloc, indelbed, unmatchedvcfloc, annobedloc):
-    if (snv or indel) and sv:
-        msg = "ERROR: --snv and --sv cannot be used at the same time."
+    print "Temp directory is {}".format(temp)
+    
+    # TODO check if the working directory is the same as input directory
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    if sum([snv, indel, sv]) != 1:
+        msg = "ERROR: Please specify exactly one of {--snv, --indel, --sv}"
         raise exceptions.AmbiguousVariantTypeException(msg)
-    elif snv != indel:
+    elif snv or indel:
         # TODO better file name with sample name
         merged_vcf = join(
             outdir,
@@ -123,12 +136,8 @@ def main(vcf, outdir, snv, indel, sv, reference, noflag, temp, normal_bam,
         merged_vcf = join(outdir, "merged.sv.vcf.gz")
         commands.merge_svs(vcf_list=vcf, out_file=merged_vcf,
                            reference=reference, working_dir=temp)
-    else:
-        msg = ("ERROR: snv={}, indel={}, sv={};"
-               "only one option is allowed.").format(snv, indel, sv)
-        raise exceptions.AmbiguousVariantTypeException(msg)
 
-    if not noflag:
+    if caveman_flag:
         # TODO check parameter
 
         perl_path = utils.which('perl')
@@ -136,7 +145,7 @@ def main(vcf, outdir, snv, indel, sv, reference, noflag, temp, normal_bam,
         flag_script = join(ROOT, "cgpFlagCaVEMan_debug.pl")
         flagConfig = join(ROOT, "flag.vcf.custom.config.ini")
         flagToVcfConfig = join(ROOT, "flag.to.vcf.custom.convert.ini")
-        flagged_vcf = join(outdir, "merged.flagged.vcf.gz")
+        flagged_vcf = join(outdir, "merged.flagged.snv.vcf.gz")
 
         commands.caveman_postprocess(
             perl_path=perl_path,

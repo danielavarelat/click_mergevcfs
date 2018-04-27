@@ -1,5 +1,6 @@
 import os
 import gzip
+import tempfile
 
 from click_mergevcfs import commands
 from click_mergevcfs import utils
@@ -32,9 +33,12 @@ def test_run(tmpdir):
     indels_vcf = [pindel_indels, mutect_indels, strelka_indels]
     svs_vcf = [brass_svs, smoove_svs, svaba_svs]
 
+    temp = tempfile.mkdtemp()
+
     # Test snvs merge
     snvs_merged = os.path.join(outdir, "merged.snvs.vcf.gz")
-    commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged)
+    commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged,
+                        working_dir=temp)
 
     with gzip.open(snvs_merged, "rb") as f:
         content = f.read()
@@ -43,15 +47,19 @@ def test_run(tmpdir):
     # Test snvs merge, check the program handles properly
     # if the output file is not gzipped
     snvs_merged = os.path.join(outdir, "merged.snvs.vcf")
-    commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged)
+    commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged,
+                        working_dir=temp)
 
     with open(snvs_merged, "r") as f:
         content = f.read()
         assert EXPECTED_SNP in content
 
+    # Test if PASSED merged
+
     # Test indels merge
     indels_merged = os.path.join(outdir, "merged.indels.vcf.gz")
-    commands.merge_snvs(vcf_list=indels_vcf, out_file=indels_merged)
+    commands.merge_snvs(vcf_list=indels_vcf, out_file=indels_merged,
+                        working_dir=temp)
 
     with gzip.open(indels_merged, "rb") as f:
         content = f.read()
@@ -60,7 +68,7 @@ def test_run(tmpdir):
     # Test SVs merge
     svs_merged = os.path.join(outdir, "merged.svs.vcf.gz")
     commands.merge_svs(vcf_list=svs_vcf, out_file=svs_merged,
-                       reference=reference)
+                       reference=reference, working_dir=temp)
     with gzip.open(svs_merged, 'rb') as f:
         content = f.read()
         assert EXPECTED_SV in content

@@ -3,12 +3,28 @@
 from os.path import join
 import os
 import tarfile
+import gzip
 
 from click_mergevcfs import utils
+from .utils import TEST
 
 # def test_tra2bnd(tmpdir):
 # TODO find a variant that is both in smoove and another tra caller. run tra2bnd on smoove and compare
 # TODO test if run tra2bnd on bnd vcf, the result is valid
+
+
+def test_decompose_multiallelic_record(tmpdir):
+    in_vcf = TEST['mutect_indels']
+    out_vcf = join(str(tmpdir), "test_decompose_multiallelic.vcf.gz")
+    utils.decompose_multiallelic_record(in_vcf=in_vcf, out_vcf=out_vcf)
+
+    expected_record_1 = "8\t117868499\t.\tTCAC\tT"
+    expected_record_2 = "8\t117868499\t.\tTCAC\tTCACC"
+    with gzip.open(out_vcf, 'rb') as fin:
+        content = fin.read()
+    assert expected_record_1 in content
+    assert expected_record_2 in content
+
 
 def test_parse_header(tmpdir):
     tmp_out = join(str(tmpdir), "tmp.out")

@@ -8,7 +8,7 @@ if [ "$1" = "--skip-build" ]; then
     echo "skipping build..."
 else
     echo "building image, to skip run with --skip-build"
-    docker build -t $TEST_IMAGE .
+    docker build -q -t $TEST_IMAGE .
 fi
 
 # see https://explainshell.com/explain?cmd=set+-euxo%20pipefail

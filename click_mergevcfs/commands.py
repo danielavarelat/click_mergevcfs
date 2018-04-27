@@ -1,26 +1,29 @@
 import os
 import subprocess
-import logging
 
 from shutil import copyfile
 
-from click_mergevcfs.utils import get_caller, parse_header, tra2bnd, is_gz_file
+from click_mergevcfs.utils import get_caller, parse_header, tra2bnd, is_gz_file, decompose_multiallelic_record, add_PASSED_field
 
 def merge_snvs(vcf_list, out_file, working_dir):
     """
     For merging snvs and indels.
     Output file format is determined based on the out_file filename.
     """
-    logging.info("INFO: Using {} as temp directory.".format(working_dir))
-
     # copy input vcf to working_dir
     working_dir_vcf_list = []
     for vcf in vcf_list:
-        vcf_basename = os.path.basename(vcf)
-        # TODO if input directory and working directory are the same,
-        # shutil.copyfile would throw a "same file" error
-        copyfile(vcf, os.path.join(working_dir, vcf_basename))
-        working_dir_vcf_list.append(os.path.join(working_dir, vcf_basename))
+        vcf_base_filename = os.path.basename(vcf)
+
+        # decompose multiallelic records
+        decomposed_vcf = os.path.join(working_dir, "decomposed_{}".format(vcf_base_filename))
+        decompose_multiallelic_record(in_vcf=vcf, out_vcf=decomposed_vcf)
+
+        # add 'PASSED' field under INFO. ex. PASSED=caveman,mutect
+        PASSED_added_vcf = os.path.join(working_dir, vcf_base_filename)
+        add_PASSED_field(in_vcf=decomposed_vcf, out_vcf=PASSED_added_vcf)
+
+        working_dir_vcf_list.append(PASSED_added_vcf)
 
     cmd = ["vcf-merge"]
 
@@ -55,14 +58,12 @@ def merge_snvs(vcf_list, out_file, working_dir):
 
 def merge_svs(vcf_list, out_file, reference, working_dir):
     """For merging svs."""
-    logging.info("INFO: Using {} as temp directory.".format(working_dir))
-
     # copy input vcf to outdirs
     working_dir_vcf_list = []
     for vcf in vcf_list:
-        vcf_basename = os.path.basename(vcf)
-        copyfile(vcf, os.path.join(working_dir, vcf_basename))
-        working_dir_vcf_list.append(os.path.join(working_dir, vcf_basename))
+        vcf_base_filename = os.path.basename(vcf)
+        copyfile(vcf, os.path.join(working_dir, vcf_base_filename))
+        working_dir_vcf_list.append(os.path.join(working_dir, vcf_base_filename))
 
     cmd = ["vcf-merge"]
     callers = []
