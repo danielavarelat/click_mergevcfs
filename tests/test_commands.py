@@ -38,7 +38,7 @@ def test_run(tmpdir):
     # Test snvs merge
     snvs_merged = os.path.join(outdir, "merged.snvs.vcf.gz")
     commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged,
-                        working_dir=temp)
+                        working_dir=tempfile.mkdtemp())
 
     with gzip.open(snvs_merged, "rb") as f:
         content = f.read()
@@ -48,7 +48,7 @@ def test_run(tmpdir):
     # if the output file is not gzipped
     snvs_merged = os.path.join(outdir, "merged.snvs.vcf")
     commands.merge_snvs(vcf_list=snvs_vcf, out_file=snvs_merged,
-                        working_dir=temp)
+                        working_dir=tempfile.mkdtemp())
 
     with open(snvs_merged, "r") as f:
         content = f.read()
@@ -59,7 +59,7 @@ def test_run(tmpdir):
     # Test indels merge
     indels_merged = os.path.join(outdir, "merged.indels.vcf.gz")
     commands.merge_snvs(vcf_list=indels_vcf, out_file=indels_merged,
-                        working_dir=temp)
+                        working_dir=tempfile.mkdtemp())
 
     with gzip.open(indels_merged, "rb") as f:
         content = f.read()
@@ -68,7 +68,7 @@ def test_run(tmpdir):
     # Test SVs merge
     svs_merged = os.path.join(outdir, "merged.svs.vcf.gz")
     commands.merge_svs(vcf_list=svs_vcf, out_file=svs_merged,
-                       reference=reference, working_dir=temp)
+                       reference=reference, working_dir=tempfile.mkdtemp())
     with gzip.open(svs_merged, 'rb') as f:
         content = f.read()
         assert EXPECTED_SV in content
