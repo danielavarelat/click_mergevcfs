@@ -114,10 +114,12 @@ from click_mergevcfs import utils
     help="Path to bed files containing annotatable regions and coding regions."
 )
 @click.version_option(version=__version__)
-def main(vcf, outdir, snv, indel, sv, reference, caveman_flag, temp, normal_bam,
-         tumor_bam, bedfileloc, indelbed, unmatchedvcfloc, annobedloc):
+def main(vcf, outdir, snv, indel, sv, reference, caveman_flag, pindel_flag,
+         temp, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc,
+         annobedloc):
     print "Temp directory is {}".format(temp)
-    
+    outdir = os.path.abspath(outdir)
+
     # TODO check if the working directory is the same as input directory
     if not os.path.exists(outdir):
         os.makedirs(outdir)

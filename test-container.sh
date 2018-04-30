@@ -24,8 +24,8 @@ echo "testing docker image..."
 find . -name '*.pyc' -exec rm {} +
 find . -name '__pycache__' -exec rm -rf {} +
 
-docker run --rm -it $TEST_IMAGE --version
-docker run --rm -it --entrypoint ''  -v `pwd`:/test -w /test  \
+docker run --rm -i $TEST_IMAGE --version
+docker run --rm -i --entrypoint ''  -v `pwd`:/test -w /test  \
     $TEST_IMAGE bash -c 'cp -r /test /tmp && cd /tmp/test/ && pip install pytest && pytest tests' # && cp .coverage /test'
 
 # move container coverage paths to local, see .coveragerc [paths] and this comment:

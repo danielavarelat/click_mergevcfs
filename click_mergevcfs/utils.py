@@ -5,6 +5,7 @@ import tarfile
 import shutil
 import gzip
 import binascii
+import subprocess
 import pysam
 
 def get_caller(in_vcf):
@@ -20,7 +21,7 @@ def get_caller(in_vcf):
 
     callers = ['mutect', 'strelka', 'mutect', 'caveman', 'pindel', 'brass']
     caller = set([c for c in callers if c in content])
-    
+
     if len(caller) != 1:
         print "Unable to determine caller of a vcf: None or 1+ callers found."
         return False
@@ -30,30 +31,33 @@ def get_caller(in_vcf):
 
 def add_PASSED_field(in_vcf, out_vcf):
     # PASSED as string or flags?
-    # see logic of merging INFO fields 
+    # see logic of merging INFO fields
     # https: // github.com/vcftools/vcftools/blob/490848f7865abbb4b436ca09381ea7912a363fe3/src/perl/vcf-merge  # L441
-    i_vcf = pysam.VariantFile(in_vcf, 'r')
-    new_header = i_vcf.header.copy()
-    new_header.info.add('PASSED', '.', 'String', "this variants passed which caller(s)")
-    i_vcf.header.info.add('PASSED', '.', 'String', "this variants passed which caller(s)")
-
-    o_vcf = pysam.VariantFile(out_vcf, 'w', header=new_header)
-
     caller = get_caller(in_vcf)
+
+    i_vcf = pysam.VariantFile(in_vcf, 'rb')
+    new_header = i_vcf.header.copy()
+    new_header.info.add('PASSED_{}'.format(caller), '.', 'Flag', "this variants passed which caller(s)")
+    i_vcf.header.info.add('PASSED_{}'.format(caller), '.', 'Flag', "this variants passed which caller(s)")
+
+    raw_out = out_vcf.strip('.gz')
+    o_vcf = pysam.VariantFile(raw_out, 'w', header=new_header)
 
     for record in i_vcf:
         new_rec = record.copy()
-        if record.filter[0] == 'PASS':
-            #record.info['PASSED'] = caller
-            new_rec.info['PASSED'] = caller
+        if list(record.filter)[0] == 'PASS':
+            new_rec.info['PASSED_{}'.format(caller)] = 1
         o_vcf.write(new_rec)
 
     o_vcf.close()
 
+    subprocess.check_call(['bgzip', raw_out])
+
 
 def decompose_multiallelic_record(in_vcf, out_vcf):
     i_vcf = pysam.VariantFile(in_vcf, 'r')
-    o_vcf = pysam.VariantFile(out_vcf, 'w', header=i_vcf.header)
+    raw_out = out_vcf.strip('.gz')
+    o_vcf = pysam.VariantFile(raw_out, 'w', header=i_vcf.header)
 
     for record in i_vcf:
         number_events = len(record.alts)
@@ -71,6 +75,8 @@ def decompose_multiallelic_record(in_vcf, out_vcf):
             o_vcf.write(record)
 
     o_vcf.close()
+    
+    subprocess.check_call(['bgzip', raw_out])
 
 
 def tra2bnd(in_vcf, out_vcf, reference):
