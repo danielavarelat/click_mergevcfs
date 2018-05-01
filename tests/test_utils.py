@@ -9,7 +9,8 @@ from click_mergevcfs import utils
 from .utils import TEST
 
 # def test_tra2bnd(tmpdir):
-# TODO find a variant that is both in smoove and another tra caller. run tra2bnd on smoove and compare
+# TODO find a variant that is both in smoove and another tra caller.
+# run tra2bnd on smoove and compare
 # TODO test if run tra2bnd on bnd vcf, the result is valid
 
 
@@ -33,11 +34,13 @@ def test_parse_header(tmpdir):
 
     callers = ['caller1', 'caller2']
     utils.parse_header(tmp_out, callers)
-    expected_header = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tcaller1_NORMAL\tcaller1_TUMOR\tcaller2_NORMAL\tcaller2_TUMOR"
+    expected_header = ("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t"
+                       "caller1_NORMAL\tcaller1_TUMOR\tcaller2_NORMAL\t"
+                       "caller2_TUMOR")
 
     with open(tmp_out, 'r') as fin:
         content = fin.read()
-    assert expected_header in content 
+    assert expected_header in content
 
 
 def test_force_symlink(tmpdir):

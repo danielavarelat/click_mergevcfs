@@ -6,9 +6,11 @@ import shutil
 import gzip
 import binascii
 import subprocess
+import tempfile
 import pysam
 
 def get_caller(in_vcf):
+    """Determine which caller produced a given vcf file."""
     vcf = None
     if is_gz_file(in_vcf):
         vcf = gzip.open(in_vcf, 'rb')
@@ -17,7 +19,7 @@ def get_caller(in_vcf):
     # Potential problem if file is too big
     content = vcf.read().lower()
     # Caveman files may contain 'pindel.germline.bed', Temporary fix
-    content = content.replace('pindel.germline.bed','pindl.germline.bed')
+    content = content.replace('pindel.germline.bed', 'pindl.germline.bed')
 
     callers = ['mutect', 'strelka', 'mutect', 'caveman', 'pindel', 'brass']
     caller = set([c for c in callers if c in content])
@@ -30,15 +32,23 @@ def get_caller(in_vcf):
 
 
 def add_PASSED_field(in_vcf, out_vcf):
-    # PASSED as string or flags?
+    """
+    Add PASSED_{caller} fields.
+
+    Add flags (e.g. PASSED_caveman) under INFO for PASS variant in aim of reduce
+    ambiguity of confident variants in the merged vcf.
+    """
     # see logic of merging INFO fields
-    # https: // github.com/vcftools/vcftools/blob/490848f7865abbb4b436ca09381ea7912a363fe3/src/perl/vcf-merge  # L441
+    # pylint: disable=C0321
+    # https://github.com/vcftools/vcftools/blob/490848f7865abbb4b436ca09381ea7912a363fe3/src/perl/vcf-merge
     caller = get_caller(in_vcf)
 
     i_vcf = pysam.VariantFile(in_vcf, 'rb')
     new_header = i_vcf.header.copy()
-    new_header.info.add('PASSED_{}'.format(caller), '.', 'Flag', "this variants passed which caller(s)")
-    i_vcf.header.info.add('PASSED_{}'.format(caller), '.', 'Flag', "this variants passed which caller(s)")
+    new_header.info.add('PASSED_{}'.format(caller), '.', 'Flag',
+                        "this variants passed which caller(s)")
+    i_vcf.header.info.add('PASSED_{}'.format(caller), '.', 'Flag',
+                          "this variants passed which caller(s)")
 
     raw_out = out_vcf.strip('.gz')
     o_vcf = pysam.VariantFile(raw_out, 'w', header=new_header)
@@ -55,6 +65,7 @@ def add_PASSED_field(in_vcf, out_vcf):
 
 
 def decompose_multiallelic_record(in_vcf, out_vcf):
+    """Break records with multiple ALT alleles into multiple records."""
     i_vcf = pysam.VariantFile(in_vcf, 'r')
     raw_out = out_vcf.strip('.gz')
     o_vcf = pysam.VariantFile(raw_out, 'w', header=i_vcf.header)
@@ -75,11 +86,12 @@ def decompose_multiallelic_record(in_vcf, out_vcf):
             o_vcf.write(record)
 
     o_vcf.close()
-    
-    subprocess.check_call(['bgzip', raw_out])
+
+    subprocess.check_call(['bgzip', '-f', raw_out])
 
 
 def tra2bnd(in_vcf, out_vcf, reference):
+    """Convert SV TRA format to SV BND format."""
     # TODO add SVCLASS={DEL,DUP,INV}
     tra_vcf = pysam.VariantFile(in_vcf, 'r')
     bnd_vcf = pysam.VariantFile(out_vcf, 'w', header=tra_vcf.header)
@@ -98,10 +110,12 @@ def tra2bnd(in_vcf, out_vcf, reference):
 
 
 def get_ref(reference, chrom, pos):
+    """Return the reference base at a given genomic position."""
     return reference.fetch(chrom, start=int(pos)-1, end=int(pos))
 
 
 def get_alt(alt, ref, chrom, pos):
+    """Return BND ALT."""
     if alt == "<DEL>":
         return "{}[{}:{}[".format(ref, chrom, pos)
     if alt == "<DUP>":
@@ -116,13 +130,14 @@ def get_alt(alt, ref, chrom, pos):
 
 
 def parse_header(vcf, callers):
+    """Replace hard-to-read and ambiguious header with clear header."""
     # TODO maybe instead of {}_Normal and {}_Tumor, do {}_{sample name}
-    out_file = "out.tmp.vcf"
+    temp = tempfile.NamedTemporaryFile()
     header = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT"
     for c in callers:
         header += "\t{}_NORMAL\t{}_TUMOR".format(c, c)
     header += "\n"
-    with open(out_file, "w") as fout:
+    with open(temp.name, "w") as fout:
         with open(vcf, "r") as fin:
             for line in fin:
                 if line.startswith("#CHROM"):
@@ -130,10 +145,11 @@ def parse_header(vcf, callers):
                 else:
                     fout.write(line)
     os.remove(vcf)
-    shutil.move(out_file, vcf)
+    shutil.move(temp.name, vcf)
 
 
 def which(pgm):
+    """Python equivlent of linux `which`."""
     path = os.getenv('PATH')
     for p in path.split(os.path.pathsep):
         p = os.path.join(p, pgm)
@@ -142,6 +158,7 @@ def which(pgm):
 
 
 def is_gz_file(f):
+    """Return true if a given file is gziped."""
     with open(f, 'rb') as fin:
         return binascii.hexlify(fin.read(2)) == b'1f8b'
 

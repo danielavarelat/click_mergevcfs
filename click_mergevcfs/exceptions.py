@@ -10,7 +10,7 @@ class AmbiguousVariantTypeException(PackageBaseException):
 
     """A class to raise when the variant type in the input vcf is ambiguous."""
 
-    
+
 class ValidationError(PackageBaseException):
 
     """A class to raise when a validation error occurs."""

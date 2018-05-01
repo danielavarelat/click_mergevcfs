@@ -497,9 +497,6 @@ sub getUnmatchedVCFIntersectMatch{
 sub runFlagger{
 	my ($flagger,$flagName,$flagId,$chr,$pos,$mut,$x,$vcf,$cfg,$isInUmVCF) = @_;
 	my $coord = $chr.':'.$pos;
-	if($flagName eq 'dummyFlag'){
-		print "$coord\n";
-	}
 	
 	# Try to find ALT reads; if can't, output warning, and return 0.
 	# Author Joe Zhou
@@ -513,7 +510,7 @@ sub runFlagger{
 			if($e eq ''){
 				$e = 'Cant find ALT reads in bam.'
 			}
-			print "WARNING: Caught depth error: [$e]\tPutting dummyFlag\n";
+			print "WARNING: Caught depth error at $coord: [$e]\tPutting dummyFlag\n";
 			return 0;
 		};
 		return 1;

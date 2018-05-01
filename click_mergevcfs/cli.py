@@ -28,7 +28,6 @@ from click_mergevcfs import utils
 
 @click.command()
 @click.option(
-    # TODO abspath
     "--vcf",
     multiple=True,
     help="Input vcf file"
@@ -54,7 +53,7 @@ from click_mergevcfs import utils
     "--sv",
     is_flag=True,
     default=False,
-    help="The input vcfs contain svs",
+    help="Note: Not currently supported. The input vcfs contain svs",
 )
 @click.option(
     "--reference",
@@ -117,6 +116,7 @@ from click_mergevcfs import utils
 def main(vcf, outdir, snv, indel, sv, reference, caveman_flag, pindel_flag,
          temp, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc,
          annobedloc):
+    """click_mergevcfs main command."""
     print "Temp directory is {}".format(temp)
     outdir = os.path.abspath(outdir)
 
@@ -147,7 +147,7 @@ def main(vcf, outdir, snv, indel, sv, reference, caveman_flag, pindel_flag,
         flag_script = join(ROOT, "cgpFlagCaVEMan_debug.pl")
         flagConfig = join(ROOT, "flag.vcf.custom.config.ini")
         flagToVcfConfig = join(ROOT, "flag.to.vcf.custom.convert.ini")
-        flagged_vcf = join(outdir, "merged.flagged.snv.vcf.gz")
+        flagged_vcf = join(outdir, "merged.flagged.snv.vcf")
 
         commands.caveman_postprocess(
             perl_path=perl_path,
