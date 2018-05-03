@@ -145,8 +145,7 @@ def parse_header(vcf, callers):
                 else:
                     fout.write(line)
     os.remove(vcf)
-    shutil.move(temp.name, vcf)
-
+    shutil.copyfile(temp.name, vcf)
 
 def which(pgm):
     """Python equivlent of linux `which`."""
