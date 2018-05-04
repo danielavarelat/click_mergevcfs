@@ -105,7 +105,6 @@ def test_run_flagging(tmpdir):
     flagConfig = os.path.join(ROOT, "flag.vcf.custom.config.ini")
     flagToVcfConfig = os.path.join(ROOT, "flag.to.vcf.custom.convert.ini")
     flagged_vcf = os.path.join(outdir, "merged.flagged.snv.vcf.gz")
-    reference_fai = reference + ".fai"
 
     commands.caveman_postprocess(
         perl_path=perl_path,
@@ -117,7 +116,7 @@ def test_run_flagging(tmpdir):
         bedFileLoc=bedFileLoc,
         indelBed=indelBed,
         unmatchedVCFLoc=unmatchedVCFLoc,
-        reference=reference_fai,
+        reference=reference,
         flagConfig=flagConfig,
         flagToVcfConfig=flagToVcfConfig,
         annoBedLoc=annoBedLoc
