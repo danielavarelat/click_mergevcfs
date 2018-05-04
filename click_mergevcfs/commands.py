@@ -51,7 +51,7 @@ def merge_snvs(vcf_list, out_file, working_dir):
     fout.close()
 
     parse_header(temp.name, callers)
-    
+
     # vcf-merge may create multiple ALT alleles per record, we need to
     # break those alleles into multiple lines.
     decompose_multiallelic_record(in_vcf=temp.name, out_vcf=out_file)
