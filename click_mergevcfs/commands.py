@@ -109,7 +109,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         '-b', bedFileLoc,
         '-g', indelBed,
         '-umv', unmatchedVCFLoc,
-        '-ref', reference,
+        '-ref', reference + ".fai", # Reference index (fai) from caveman help
         '-t', 'pulldown',
         '-c', flagConfig,
         '-v', flagToVcfConfig,
