@@ -44,13 +44,13 @@ def merge_snvs(vcf_list, out_file, working_dir):
         cmd.extend([vcf])
 
     cmd = list(map(str, cmd))
-    temp = tempfile.NamedTemporaryFile(delete=True)
+    temp = tempfile.NamedTemporaryFile(suffix=".vcf", delete=True)
     fout = open(temp.name, 'w')
     # Output of vcf-merge is not bgziped, regardless of the output filename
     subprocess.check_call(cmd, stdout=fout)
     fout.close()
 
-    parse_header(temp.name, callers)
+    parse_header(vcf=temp.name, callers=callers)
 
     # vcf-merge may create multiple ALT alleles per record, we need to
     # break those alleles into multiple lines.

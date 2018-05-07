@@ -25,9 +25,10 @@ def get_caller(in_vcf):
     caller = set([c for c in callers if c in content])
 
     if len(caller) != 1:
+        sample_name = os.path.basename(in_vcf).split(".vcf")[0]
         print ("Unable to determine caller of {}: None or 1+ callers found. "
-              ).format(in_vcf)
-        return False
+               "Using sample name {}.").format(in_vcf, sample_name)
+        return sample_name
     print "{} is produced by {}".format(in_vcf, list(caller)[0])
     return list(caller)[0]
 
