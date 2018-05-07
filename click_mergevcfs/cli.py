@@ -33,9 +33,9 @@ from click_mergevcfs import utils
     help="Input vcf file"
 )
 @click.option(
-    "--outdir",
+    "--out",
     required=True,
-    help="Path to the output directory",
+    help="Path to the output file",
 )
 @click.option(
     "--snv",
@@ -61,10 +61,10 @@ from click_mergevcfs import utils
     help="Genome reference file (ex. GRCH37D5)"
 )
 @click.option(
-    "--caveman_flag",
+    "--caveman_flagged_out",
     is_flag=True,
     default=False,
-    help="Apply Caveman Postprocessing flagging to merged vcf"
+    help="Path to the Caveman Postprocessing flagged merged vcf"
 )
 @click.option(
     "--pindel_flag",
@@ -113,12 +113,12 @@ from click_mergevcfs import utils
     help="Path to bed files containing annotatable regions and coding regions."
 )
 @click.version_option(version=__version__)
-def main(vcf, outdir, snv, indel, sv, reference, caveman_flag, pindel_flag,
+def main(vcf, out, snv, indel, sv, reference, caveman_flagged_out, pindel_flag,
          temp, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc,
          annobedloc):
     """click_mergevcfs main command."""
     print "Temp directory is {}".format(temp)
-    outdir = os.path.abspath(outdir)
+    outdir = os.path.dirname(os.path.abspath(out))
 
     # TODO check if the working directory is the same as input directory
     if not os.path.exists(outdir):
@@ -128,18 +128,12 @@ def main(vcf, outdir, snv, indel, sv, reference, caveman_flag, pindel_flag,
         msg = "ERROR: Please specify exactly one of {--snv, --indel, --sv}"
         raise exceptions.AmbiguousVariantTypeException(msg)
     elif snv or indel:
-        # TODO better file name with sample name
-        merged_vcf = join(
-            outdir,
-            "merged.{}.vcf.gz".format("snv" if snv else "indel")
-        )
-        commands.merge_snvs(vcf_list=vcf, out_file=merged_vcf, working_dir=temp)
+        commands.merge_snvs(vcf_list=vcf, out_file=out, working_dir=temp)
     elif sv:
-        merged_vcf = join(outdir, "merged.sv.vcf.gz")
-        commands.merge_svs(vcf_list=vcf, out_file=merged_vcf,
+        commands.merge_svs(vcf_list=vcf, out_file=out,
                            reference=reference, working_dir=temp)
 
-    if caveman_flag:
+    if caveman_flagged_out:
         # TODO check parameter
 
         perl_path = utils.which('perl')
@@ -147,13 +141,12 @@ def main(vcf, outdir, snv, indel, sv, reference, caveman_flag, pindel_flag,
         flag_script = join(ROOT, "cgpFlagCaVEMan_debug.pl")
         flagConfig = join(ROOT, "flag.vcf.custom.config.ini")
         flagToVcfConfig = join(ROOT, "flag.to.vcf.custom.convert.ini")
-        flagged_vcf = join(outdir, "merged.flagged.snv.vcf")
 
         commands.caveman_postprocess(
             perl_path=perl_path,
             flag_script=flag_script,
-            in_vcf=merged_vcf,
-            out_vcf=flagged_vcf,
+            in_vcf=out,
+            out_vcf=caveman_flagged_out,
             normal_bam=normal_bam,  # -n
             tumor_bam=tumor_bam,  # -m
             bedFileLoc=bedfileloc,  # -b

@@ -35,7 +35,7 @@ def merge_snvs(vcf_list, out_file, working_dir):
         callers.append(get_caller(vcf))
         bgzip_vcf = ""
         if (not vcf.endswith('.gz')) and (not is_gz_file(vcf)):
-            subprocess.check_call(['bgzip', vcf])
+            subprocess.check_call(['bgzip', '-f', vcf])
             bgzip_vcf = vcf + ".gz"
         else:
             bgzip_vcf = vcf
@@ -91,7 +91,7 @@ def merge_svs(vcf_list, out_file, reference, working_dir):
     if out_file.endswith('.gz') and (not is_gz_file(out_file)):
         corrected_filename = out_file.strip('.gz')
         os.rename(out_file, corrected_filename)
-        subprocess.check_call(['bgzip', corrected_filename])
+        subprocess.check_call(['bgzip', '-f', corrected_filename])
 
 
 def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,

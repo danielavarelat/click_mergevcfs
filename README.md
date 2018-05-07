@@ -17,10 +17,10 @@ Merge vcfs files from multiple different callers.
 This tool is designed to be used with containers. Run click_mergevcfs with a container:
 
         docker run --volumes local/path:/data leukgen/click_mergevcfs \
-                --vcf /path/to/caller1.snvs.vcf \
-                --vcf /path/to/caller2.snvs.vcf \
-                --vcf /path/to/caller3.snvs.vcf \
-                --out /path/to/merged_output.vcf \
+                --vcf /path/to/caller1.snvs.vcf.gz \
+                --vcf /path/to/caller2.snvs.vcf.gz \
+                --vcf /path/to/caller3.snvs.vcf.gz \
+                --out /path/to/merged_output.snv.vcf.gz \
                 --reference /path/to/reference.fasta \
                 --snv \
 
@@ -29,17 +29,18 @@ This tool is designed to be used with containers. Run click_mergevcfs with a con
 | Option      | Description                                   |
 | ----------- | --------------------------------------------- |
 | --vcf       | Path to a input vcf file                      |
-| --outdir    | Path to the output file                       |
-| --snv       | If the input vcf files contain snvs or indels |
-| --sv        | If the input vcf files contain svs            |
+| --out       | Path to the output file                       |
+| --snv       | If the input vcf files contain only snvs      |
+| --indel     | If the input vcf files contain only indels    |
+| --sv        | If the input vcf files contain only svs       |
 | --reference | Path to the reference fasta                   |
-| --no_flag   | Don't apply custom postprocessing             |
 | --temp      | Temporary working directory                   |
 
 The following options are required to run caveman postprocessing:
 
 | Option            | Description                                   |
 | ----------- | --------------------------------------------- |
+| --caveman_flagged_out | Path to caveman flagged output file |
 | --normal_bam      | Path to normal bam |
 | --tumor_bam       | Path to tumor bam |
 | --bedFileLoc      | Path to a folder containing centromeric, snp, hi seq depth, simple repeat bed files |

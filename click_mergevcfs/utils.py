@@ -25,7 +25,8 @@ def get_caller(in_vcf):
     caller = set([c for c in callers if c in content])
 
     if len(caller) != 1:
-        print "Unable to determine caller of a vcf: None or 1+ callers found."
+        print ("Unable to determine caller of {}: None or 1+ callers found. "
+              ).format(in_vcf)
         return False
     print "{} is produced by {}".format(in_vcf, list(caller)[0])
     return list(caller)[0]
@@ -61,7 +62,7 @@ def add_PASSED_field(in_vcf, out_vcf):
 
     o_vcf.close()
 
-    subprocess.check_call(['bgzip', raw_out])
+    subprocess.check_call(['bgzip', '-f', raw_out])
 
 
 def decompose_multiallelic_record(in_vcf, out_vcf):
