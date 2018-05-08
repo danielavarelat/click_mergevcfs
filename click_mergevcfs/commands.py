@@ -44,7 +44,7 @@ def merge_snvs(vcf_list, out_file, working_dir):
         cmd.extend([vcf])
 
     cmd = list(map(str, cmd))
-    temp = tempfile.NamedTemporaryFile(suffix=".vcf", delete=True)
+    temp = tempfile.NamedTemporaryFile(suffix=".tmp.vcf", dir=working_dir, delete=False)
     fout = open(temp.name, 'w')
     # Output of vcf-merge is not bgziped, regardless of the output filename
     subprocess.check_call(cmd, stdout=fout)

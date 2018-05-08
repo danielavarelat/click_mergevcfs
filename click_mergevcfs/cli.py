@@ -138,7 +138,7 @@ def main(vcf, out, snv, indel, sv, reference, caveman_flagged_out, pindel_flag,
 
         perl_path = utils.which('perl')
         ROOT = abspath(dirname(__file__))
-        flag_script = join(ROOT, "cgpFlagCaVEMan_debug.pl")
+        flag_script = join(ROOT, "cgpFlagCaVEMan_custom.pl")
         flagConfig = join(ROOT, "flag.vcf.custom.config.ini")
         flagToVcfConfig = join(ROOT, "flag.to.vcf.custom.convert.ini")
 
