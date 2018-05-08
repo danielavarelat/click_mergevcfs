@@ -12,17 +12,21 @@ Merge vcfs files from multiple different callers.
 
         pip install click_mergevcfs
 
-## Example
+# Usage
 
-This tool is designed to be used with containers. Run click_mergevcfs with a container:
+        singularity run [SINGULARITY-OPTIONS] <image> [PIPELINE-OPTIONS]
 
-        docker run --volumes local/path:/data leukgen/click_mergevcfs \
-                --vcf /path/to/caller1.snvs.vcf.gz \
-                --vcf /path/to/caller2.snvs.vcf.gz \
-                --vcf /path/to/caller3.snvs.vcf.gz \
-                --out /path/to/merged_output.snv.vcf.gz \
-                --reference /path/to/reference.fasta \
-                --snv \
+# Example
+        singularity \
+                run \
+                --containall \
+                --bind /ifs \
+                {singularity image} \
+                --vcf {path to vcf1} \
+                --vcf {path to vcf2} \
+                --vcf {path to vcf3} \
+                --out {path to merged output vcf} \
+                --snv
 
 ## Options
 

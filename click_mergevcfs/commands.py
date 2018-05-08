@@ -22,7 +22,7 @@ def merge_snvs(vcf_list, out_file, working_dir):
         )
         decompose_multiallelic_record(in_vcf=vcf, out_vcf=decomposed_vcf)
 
-        # add 'PASSED' field under INFO. ex. PASSED=caveman,mutect
+        # add 'PASSED' field under INFO. ex. PASSED_caveman,PASSED_mutect
         PASSED_added_vcf = os.path.join(working_dir, vcf_base_filename)
         add_PASSED_field(in_vcf=decomposed_vcf, out_vcf=PASSED_added_vcf)
 
