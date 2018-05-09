@@ -76,6 +76,7 @@ def decompose_multiallelic_record(in_vcf, out_vcf):
         number_events = len(record.alts)
         # Only mutect put multiple ALTS in one record
         if number_events > 1:
+            print "file={},pos={}".format(in_vcf, record.pos)
             for i in range(0, number_events):
                 new_rec = record.copy()
                 new_rec.alts = tuple([record.alts[i]])
@@ -85,22 +86,38 @@ def decompose_multiallelic_record(in_vcf, out_vcf):
                 for g in genotypes:
                     # Overwrite GT
                     new_rec.samples[g]['GT'] = (None, None)
-                    # Use none_if_tuple_index_out_of_range because 
-                    # record.samples[g]['AD'] would sometimes return 
+                    # Use none_if_tuple_out_of_idx because
+                    # record.samples[g]['AD'] would sometimes return
                     # a tuple of (None,)
-                    new_rec.samples[g]['AD'] = (
-                        record.samples[g]['AD'][0],
-                        none_if_tuple_index_out_of_range(t=record.samples[g]['AD'], index=i+1)
-                    )
-                    new_rec.samples[g]['AF'] = none_if_tuple_index_out_of_range(t=record.samples[g]['AF'], index=i)
-                    new_rec.samples[g]['F1R2'] = (
-                        record.samples[g]['F1R2'][0],
-                        none_if_tuple_index_out_of_range(t=record.samples[g]['F1R2'], index=i+1)
-                    )
-                    new_rec.samples[g]['F2R1'] = (
-                        record.samples[g]['F2R1'][0],
-                        none_if_tuple_index_out_of_range(t=record.samples[g]['F2R1'], index=i+1)
-                    )
+                    if 'AD' in list(record.samples[g]):
+                        new_rec.samples[g]['AD'] = (
+                            record.samples[g]['AD'][0],
+                            none_if_tuple_out_of_idx(
+                                t=record.samples[g]['AD'],
+                                index=i+1
+                            )
+                        )
+                    if 'AF' in list(record.samples[g]):
+                        new_rec.samples[g]['AF'] = none_if_tuple_out_of_idx(
+                            t=record.samples[g]['AF'],
+                            index=i
+                        )
+                    if 'F1R2' in list(record.samples[g]):
+                        new_rec.samples[g]['F1R2'] = (
+                            record.samples[g]['F1R2'][0],
+                            none_if_tuple_out_of_idx(
+                                t=record.samples[g]['F1R2'],
+                                index=i+1
+                            )
+                        )
+                    if 'F2R1' in list(record.samples[g]):
+                        new_rec.samples[g]['F2R1'] = (
+                            record.samples[g]['F2R1'][0],
+                            none_if_tuple_out_of_idx(
+                                t=record.samples[g]['F2R1'],
+                                index=i+1
+                            )
+                        )
                 o_vcf.write(new_rec)
         else:
             o_vcf.write(record)
@@ -181,8 +198,8 @@ def is_gz_file(f):
     with open(f, 'rb') as fin:
         return binascii.hexlify(fin.read(2)) == b'1f8b'
 
-def none_if_tuple_index_out_of_range(t, index):
-    """Return none if t[i] is out of index"""
+def none_if_tuple_out_of_idx(t, index):
+    """Return none if t[i] is out of index, else return t[i]."""
     return t[index] if len(t) > index else None
 
 def force_link(src, dst):

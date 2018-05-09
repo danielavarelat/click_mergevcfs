@@ -62,7 +62,6 @@ from click_mergevcfs import utils
 )
 @click.option(
     "--caveman_flagged_out",
-    is_flag=True,
     default=False,
     help="Path to the Caveman Postprocessing flagged merged vcf"
 )
@@ -117,6 +116,8 @@ def main(vcf, out, snv, indel, sv, reference, caveman_flagged_out, pindel_flag,
          temp, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc,
          annobedloc):
     """click_mergevcfs main command."""
+    if not os.path.isdir(temp):
+        os.makedirs(temp)
     print "Temp directory is {}".format(temp)
     outdir = os.path.dirname(os.path.abspath(out))
 
@@ -135,7 +136,6 @@ def main(vcf, out, snv, indel, sv, reference, caveman_flagged_out, pindel_flag,
 
     if caveman_flagged_out:
         # TODO check parameter
-
         perl_path = utils.which('perl')
         ROOT = abspath(dirname(__file__))
         flag_script = join(ROOT, "cgpFlagCaVEMan_custom.pl")

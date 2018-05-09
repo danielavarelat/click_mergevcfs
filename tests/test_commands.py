@@ -101,7 +101,7 @@ def test_run_flagging(tmpdir):
     print perl_path
     ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
                                         'click_mergevcfs'))
-    flag_script = os.path.join(ROOT, "cgpFlagCaVEMan_debug.pl")
+    flag_script = os.path.join(ROOT, "cgpFlagCaVEMan_custom.pl")
     flagConfig = os.path.join(ROOT, "flag.vcf.custom.config.ini")
     flagToVcfConfig = os.path.join(ROOT, "flag.to.vcf.custom.convert.ini")
     flagged_vcf = os.path.join(outdir, "merged.flagged.snv.vcf.gz")
