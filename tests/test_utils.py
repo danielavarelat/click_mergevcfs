@@ -4,6 +4,7 @@ from os.path import join
 import os
 import tarfile
 import gzip
+import pysam
 
 from click_mergevcfs import utils
 from .utils import TEST
@@ -25,6 +26,21 @@ def test_decompose_multiallelic_record(tmpdir):
         content = fin.read()
     assert expected_record_1 in content
     assert expected_record_2 in content
+
+    vcf = pysam.VariantFile(out_vcf)
+    for record in vcf:
+        if record.pos == 117868499 and record.alts[0] == 'T':
+            assert record.samples[0]['AD'] == (565, 51)
+            assert record.samples[0]['AF'][0] == 0.26100000739097595
+            assert record.samples[0]['F1R2'] == (272, 19)
+            assert record.samples[0]['F2R1'] == (284, 20)
+        if record.pos == 117868499 and record.alts[0] == 'TCACC':
+            assert record.samples[0]['AD'] == (565, 1)
+            # AF is higher than calculated
+            # https://software.broadinstitute.org/gatk/documentation/article?id=11096
+            assert record.samples[0]['AF'][0] == 0.04100000113248825
+            assert record.samples[0]['F1R2'] == (272, 0)
+            assert record.samples[0]['F2R1'] == (284, 0)
 
 
 def test_parse_header(tmpdir):
