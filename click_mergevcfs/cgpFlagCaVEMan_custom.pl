@@ -239,8 +239,19 @@ sub main{
 			  $isInUmVCF = getUnmatchedVCFIntersectMatch($$x[0],$$x[1],$umNormVcf->{$$x[0]},$UNMATCHED_VCF_KEY);
       }
 			my $results = getVCFToAddResultsOfFilters($$x[0],$$x[1],$$x[3],$$x[4],$flagList,$flagger,$cfg,$x,$vcf,$configParams,$isInUmVCF);
-			#Add the relevant filters or PASS to the filter section.
-			$$x[6]=$vcf->add_filter($$x[6],%$results);
+			# If the existing filter is PASS, prevent caveman overwritting
+			# PASS with DMY flag. If the existing filter contains DTH, don't
+			# add any flags.
+			# Author: Joe Zhou
+			my $flag_hash = %$results;
+			# 1/8 somehow is the hash of DMY.
+			if(($$x[6] eq 'PASS') && ($flag_hash eq '1/8') || (index($$x[6], 'DTH') != -1)){
+				print "skip add_filter\n";
+			}
+			else{
+				#Add the relevant filters or PASS to the filter section.
+				$$x[6]=$vcf->add_filter($$x[6],%$results);
+			}
 			#Validate this line and append this line to the output file;
 			push(@lineCache,$vcf->format_line($x));
 			if(scalar(@lineCache)>=$opts->{'l'}){
