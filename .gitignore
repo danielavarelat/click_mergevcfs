@@ -53,6 +53,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+.pytest_cache/*
 
 # Translations
 *.mo
@@ -110,3 +111,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# OS stuff
+.DS_Store

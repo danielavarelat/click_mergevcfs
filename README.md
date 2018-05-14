@@ -15,6 +15,8 @@ Merge vcfs files from multiple different callers.
 # Usage
 
         singularity run [SINGULARITY-OPTIONS] <image> [PIPELINE-OPTIONS]
+        or
+        singularity run [SINGULARITY-OPTIONS] docker://leukgen/click_mergevcfs [PIPELINE-OPTIONS]
 
 # Example
         singularity \
