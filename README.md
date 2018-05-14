@@ -12,13 +12,14 @@ Merge vcfs files from multiple different callers.
 
         pip install click_mergevcfs
 
-# Usage
+## Usage
 
         singularity run [SINGULARITY-OPTIONS] <image> [PIPELINE-OPTIONS]
         or
         singularity run [SINGULARITY-OPTIONS] docker://leukgen/click_mergevcfs [PIPELINE-OPTIONS]
 
-# Example
+## Example
+
         singularity \
                 run \
                 --containall \

@@ -4,6 +4,7 @@ import tempfile
 
 from click_mergevcfs import commands
 from click_mergevcfs import utils
+from click_mergevcfs import __version__
 from .utils import TEST
 
 EXPECTED_SNP = "8\t29496762\t8421c1fa-505f-11e7-bd98-d60f982b8ef5\tT\tG"
@@ -55,6 +56,12 @@ def test_run_snvs(tmpdir):
             if not record.startswith('#'):
                 assert not ',' in record.split('\t')[4]
 
+    # Test if click_mergevcfs is in the header
+    with gzip.open(snvs_merged, 'rb') as f:
+        content = f.read()
+        assert "##click_mergevcfs={}\n".format(__version__) in content
+
+
 def test_run_indels(tmpdir):
     outdir = tmpdir.strpath
 
@@ -73,6 +80,12 @@ def test_run_indels(tmpdir):
         for record in f:
             if not record.startswith('#'):
                 assert not ',' in record.split('\t')[4]
+
+    # Test if click_mergevcfs is in the header
+    with gzip.open(indels_merged, 'rb') as f:
+        content = f.read()
+        assert "##click_mergevcfs={}\n".format(__version__) in content
+
 
 def test_run_svs(tmpdir):
     outdir = tmpdir.strpath

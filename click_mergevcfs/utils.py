@@ -9,6 +9,8 @@ import subprocess
 import tempfile
 import pysam
 
+from click_mergevcfs import __version__
+
 def get_caller(in_vcf):
     """Determine which caller produced a given vcf file."""
     vcf = None
@@ -192,6 +194,20 @@ def which(pgm):
         if os.path.exists(p) and os.access(p, os.X_OK):
             return p
 
+def add_version(in_vcf):
+    """Add click_mergevcfs version in the output vcf header."""
+    temp = tempfile.NamedTemporaryFile(suffix=".tmp.vcf.gz", delete=False)
+    if in_vcf.endswith('gz'):
+        with gzip.open(in_vcf, 'rb') as fin:
+            lines = fin.readlines()
+    else:
+        with open(in_vcf, 'r') as fin:
+            lines = fin.readlines()
+    lines.insert(1, "##click_mergevcfs={}\n".format(__version__))
+    with gzip.open(temp.name, 'wb') as fout:
+        for l in lines:
+            fout.write(l)
+    shutil.move(temp.name, in_vcf)
 
 def is_gz_file(f):
     """Return true if a given file is gziped."""

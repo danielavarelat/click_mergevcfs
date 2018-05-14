@@ -7,7 +7,7 @@ import tempfile
 from shutil import copyfile
 
 from click_mergevcfs.utils import get_caller, parse_header, tra2bnd, \
-    is_gz_file, decompose_multiallelic_record, add_PASSED_field
+    is_gz_file, decompose_multiallelic_record, add_PASSED_field, add_version
 
 def merge_snvs(vcf_list, out_file, working_dir):
     """For merging snvs and indels."""
@@ -56,6 +56,8 @@ def merge_snvs(vcf_list, out_file, working_dir):
     # vcf-merge may create multiple ALT alleles per record, we need to
     # break those alleles into multiple lines.
     decompose_multiallelic_record(in_vcf=temp.name, out_vcf=out_file)
+    # add click_mergevcfs version to the header
+    add_version(out_file)
 
 
 def merge_svs(vcf_list, out_file, reference, working_dir):
