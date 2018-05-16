@@ -129,25 +129,6 @@ def decompose_multiallelic_record(in_vcf, out_vcf):
     subprocess.check_call(['bgzip', '-f', raw_out])
 
 
-def tra2bnd(in_vcf, out_vcf, reference):
-    """Convert SV TRA format to SV BND format."""
-    # TODO add SVCLASS={DEL,DUP,INV}
-    tra_vcf = pysam.VariantFile(in_vcf, 'r')
-    bnd_vcf = pysam.VariantFile(out_vcf, 'w', header=tra_vcf.header)
-    fasta = pysam.FastaFile(reference)
-
-    for tra_record in tra_vcf:
-        bnd_record = tra_record.copy()
-        bnd_record.ref = get_ref(fasta, tra_record.chrom, tra_record.pos)
-        bnd_record.alts = tuple(
-            [get_alt(tra_record.alts[0], bnd_record.ref, tra_record.chrom,
-                     tra_record.pos)]
-        )
-        bnd_vcf.write(bnd_record)
-
-    bnd_vcf.close()
-
-
 def get_ref(reference, chrom, pos):
     """Return the reference base at a given genomic position."""
     return reference.fetch(chrom, start=int(pos)-1, end=int(pos))
@@ -226,7 +207,6 @@ def force_link(src, dst):
         os.link(src, dst)
     except OSError:
         os.link(src, dst)
-
 
 def force_symlink(src, dst):
     """Force a symlink between src and dst."""

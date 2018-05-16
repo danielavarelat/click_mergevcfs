@@ -60,43 +60,6 @@ def merge_snvs(vcf_list, out_file, working_dir):
     add_version(out_file)
 
 
-def merge_svs(vcf_list, out_file, reference, working_dir):
-    """Note: not currently supported. For merging svs."""
-    # copy input vcf to outdirs
-    working_dir_vcf_list = []
-    for vcf in vcf_list:
-        vcf_base_filename = os.path.basename(vcf)
-        copyfile(vcf, os.path.join(working_dir, vcf_base_filename))
-        working_dir_vcf_list.append(
-            os.path.join(working_dir, vcf_base_filename)
-        )
-
-    cmd = ["vcf-merge"]
-    callers = []
-    for vcf in working_dir_vcf_list:
-        callers.append(get_caller(vcf))
-        out_vcf = vcf.split('vcf')[0] + "bnd.vcf.gz"
-        tra2bnd(in_vcf=vcf, out_vcf=out_vcf, reference=reference)
-        # Freshly index vcf just in case index file is older than vcf
-        subprocess.check_call(['tabix', '-f', '-p', 'vcf', out_vcf])
-        cmd.extend([out_vcf])
-
-    cmd = list(map(str, cmd))
-    fout = open(out_file, 'w')
-    subprocess.check_call(cmd, stdout=fout)
-    fout.close()
-
-    # TODO parse output merged vcf header
-    parse_header(out_file, callers)
-
-    # If user specify the output file should be gziped, but the outfile is not
-    # gzipped, we need to gzip the outfile
-    if out_file.endswith('.gz') and (not is_gz_file(out_file)):
-        corrected_filename = out_file.strip('.gz')
-        os.rename(out_file, corrected_filename)
-        subprocess.check_call(['bgzip', '-f', corrected_filename])
-
-
 def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
                         tumor_bam, bedFileLoc, indelBed, unmatchedVCFLoc,
                         reference, flagConfig, flagToVcfConfig, annoBedLoc):

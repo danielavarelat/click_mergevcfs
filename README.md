@@ -39,7 +39,6 @@ Merge vcfs files from multiple different callers.
 | --out       | Path to the output file                       |
 | --snv       | If the input vcf files contain only snvs      |
 | --indel     | If the input vcf files contain only indels    |
-| --sv        | If the input vcf files contain only svs       |
 | --reference | Path to the reference fasta                   |
 | --temp      | Temporary working directory                   |
 

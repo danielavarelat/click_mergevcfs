@@ -50,12 +50,6 @@ from click_mergevcfs import utils
     help="The input vcfs contain indels",
 )
 @click.option(
-    "--sv",
-    is_flag=True,
-    default=False,
-    help="Note: Not currently supported. The input vcfs contain svs",
-)
-@click.option(
     "--reference",
     default=False,
     help="Genome reference file (ex. GRCH37D5)"
@@ -112,7 +106,7 @@ from click_mergevcfs import utils
     help="Path to bed files containing annotatable regions and coding regions."
 )
 @click.version_option(version=__version__)
-def main(vcf, out, snv, indel, sv, reference, caveman_flagged_out, pindel_flag,
+def main(vcf, out, snv, indel, reference, caveman_flagged_out, pindel_flag,
          temp, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc,
          annobedloc):
     """click_mergevcfs main command."""
@@ -125,14 +119,11 @@ def main(vcf, out, snv, indel, sv, reference, caveman_flagged_out, pindel_flag,
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    if sum([snv, indel, sv]) != 1:
-        msg = "ERROR: Please specify exactly one of {--snv, --indel, --sv}"
+    if sum([snv, indel]) != 1:
+        msg = "ERROR: Please specify exactly one of {--snv, --indel}"
         raise exceptions.AmbiguousVariantTypeException(msg)
     elif snv or indel:
         commands.merge_snvs(vcf_list=vcf, out_file=out, working_dir=temp)
-    elif sv:
-        commands.merge_svs(vcf_list=vcf, out_file=out,
-                           reference=reference, working_dir=temp)
 
     if caveman_flagged_out:
         # TODO check parameter
