@@ -204,10 +204,11 @@ def add_version(in_vcf):
         with open(in_vcf, 'r') as fin:
             lines = fin.readlines()
     lines.insert(1, "##click_mergevcfs={}\n".format(__version__))
-    with gzip.open(temp.name, 'wb') as fout:
+    with open(temp.name, 'w') as fout:
         for l in lines:
             fout.write(l)
-    shutil.move(temp.name, in_vcf)
+    subprocess.check_call(["bgzip", temp.name])
+    shutil.move(temp.name+".gz", in_vcf)
 
 def is_gz_file(f):
     """Return true if a given file is gziped."""

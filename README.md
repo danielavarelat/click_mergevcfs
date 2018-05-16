@@ -28,7 +28,7 @@ Merge vcfs files from multiple different callers.
                 --vcf {path to vcf1} \
                 --vcf {path to vcf2} \
                 --vcf {path to vcf3} \
-                --out {path to merged output vcf} \
+                --out {path to merged output vcf.gz} \
                 --snv
 
 ## Options

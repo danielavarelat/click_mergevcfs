@@ -28,7 +28,7 @@ def merge_snvs(vcf_list, out_file, working_dir):
 
         working_dir_vcf_list.append(PASSED_added_vcf)
 
-    cmd = ["vcf-merge"]
+    cmd = ["vcf-merge", "--collapse", "none"]
 
     callers = []
     for vcf in working_dir_vcf_list:
