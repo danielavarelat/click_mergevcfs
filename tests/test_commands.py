@@ -1,6 +1,5 @@
 import os
 import gzip
-import tempfile
 
 from click_mergevcfs import commands
 from click_mergevcfs import utils

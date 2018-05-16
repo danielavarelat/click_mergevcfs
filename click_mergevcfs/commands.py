@@ -4,10 +4,8 @@ import os
 import subprocess
 import tempfile
 
-from shutil import copyfile
-
-from click_mergevcfs.utils import get_caller, parse_header, tra2bnd, \
-    is_gz_file, decompose_multiallelic_record, add_PASSED_field, add_version
+from click_mergevcfs.utils import get_caller, parse_header, is_gz_file, \
+     decompose_multiallelic_record, add_PASSED_field, add_version
 
 def merge_snvs(vcf_list, out_file, working_dir):
     """For merging snvs and indels."""
