@@ -9,6 +9,9 @@ ENV OPT_DIR /opt
 # Mount the output volume as persistant
 VOLUME ${OUTPUT_DIR}
 
+# Create /ifs volume for MSK users
+VOLUME /ifs
+
 RUN \
     # Install Packages Dependencies
     apt-get update -yqq && \
