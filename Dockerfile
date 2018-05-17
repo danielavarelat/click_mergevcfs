@@ -130,6 +130,9 @@ ENV PATH "$PATH:/opt/bin"
 ENV HTSLIB_LIBRARY_DIR /usr/local/lib
 ENV HTSLIB_INCLUDE_DIR /usr/local/include
 
+# Set LD_LIBRARY_PATH for correct location to libhts.* in singularity image
+ENV LD_LIBRARY_PATH "$LD_LIBRARY_PATH:/usr/local/lib/"
+
 # Install click_mergevcfs
 COPY . ${WORK_DIR}
 WORKDIR ${WORK_DIR}
