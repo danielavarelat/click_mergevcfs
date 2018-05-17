@@ -24,6 +24,8 @@ Merge vcfs files from multiple different callers.
                 run \
                 --containall \
                 --bind /ifs \
+                --scratch {recommend using /tmp} \
+                --workdir {recommend using $TMP_DIR} \
                 {singularity image} \
                 --vcf {path to vcf1} \
                 --vcf {path to vcf2} \

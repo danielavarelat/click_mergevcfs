@@ -55,6 +55,9 @@ def test_run_snvs(tmpdir):
         content = f.read()
         assert "##click_mergevcfs={}\n".format(__version__) in content
 
+    # Test if the output is gziped
+    assert utils.is_gz_file(snvs_merged)
+
 
 def test_run_indels(tmpdir):
     outdir = tmpdir.strpath
@@ -116,3 +119,6 @@ def test_run_flagging(tmpdir):
         flagToVcfConfig=flagToVcfConfig,
         annoBedLoc=annoBedLoc
         )
+
+    # Test if the flagged vcf is gziped
+    assert utils.is_gz_file(flagged_vcf)

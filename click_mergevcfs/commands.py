@@ -3,6 +3,7 @@
 import os
 import subprocess
 import tempfile
+import shutil
 
 from click_mergevcfs.utils import get_caller, parse_header, is_gz_file, \
      decompose_multiallelic_record, add_PASSED_field, add_version
@@ -85,3 +86,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
     cmd = list(map(str, cmd))
 
     subprocess.check_call(cmd)
+
+    if out_vcf.endswith('.gz'):
+        subprocess.check_call(['bgzip', out_vcf])
+        shutil.move(out_vcf+'.gz', out_vcf)

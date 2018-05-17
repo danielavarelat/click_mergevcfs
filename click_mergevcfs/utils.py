@@ -177,7 +177,7 @@ def which(pgm):
 
 def add_version(in_vcf):
     """Add click_mergevcfs version in the output vcf header."""
-    temp = tempfile.NamedTemporaryFile(suffix=".tmp.vcf.gz", delete=False)
+    temp = tempfile.NamedTemporaryFile(suffix=".tmp.vcf", delete=False)
     if in_vcf.endswith('gz'):
         with gzip.open(in_vcf, 'rb') as fin:
             lines = fin.readlines()
