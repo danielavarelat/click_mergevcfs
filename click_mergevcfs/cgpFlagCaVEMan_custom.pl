@@ -246,7 +246,7 @@ sub main{
 			my $flag_hash = %$results;
 			# 1/8 somehow is the hash of DMY.
 			if(($$x[6] eq 'PASS') && ($flag_hash eq '1/8') || (index($$x[6], 'DTH') != -1)){
-				print "skip add_filter\n";
+				#print "skip add_filter\n";
 			}
 			else{
 				#Add the relevant filters or PASS to the filter section.
@@ -521,7 +521,7 @@ sub runFlagger{
 			if($e eq ''){
 				$e = 'Cant find ALT reads in bam.'
 			}
-			print "WARNING: Caught depth error at $coord: [$e]\tPutting dummyFlag\n";
+			#print "WARNING: Caught depth error at $coord: [$e]\tPutting dummyFlag\n";
 			return 0;
 		};
 		return 1;
