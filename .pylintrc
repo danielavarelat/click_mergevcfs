@@ -175,6 +175,13 @@ disable =
     superfluous-parens,
     keyword-arg-before-vararg,
     missing-docstring,
+    invalid-name,
+    W0511, # TODO
+    R0913, # Too many arguments(10)
+    R0914, # Too many local variables(30)
+    R1710, # Either all return statements should return an expression, or none
+    W0613, # Unsed argument
+    no-member,
 
 [REPORTS]
 

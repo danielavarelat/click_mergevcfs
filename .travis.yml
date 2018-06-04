@@ -6,7 +6,7 @@ cache:
   pip: true
 
 python:
-  - 3.6
+  - 2.7
 
 services:
   - docker
@@ -14,7 +14,8 @@ services:
 install:
   - pip install -U tox-travis codecov
 
-script: tox
+script:
+  - travis_wait 20 bash test-container.sh
 
 after_success:
   - codecov --disable search
@@ -27,5 +28,5 @@ deploy:
   on:
     tags: true
     repo: leukgen/click_mergevcfs
-    python: 3.6
+    python: 2.7
     branch: master
