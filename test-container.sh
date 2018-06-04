@@ -25,8 +25,9 @@ find . -name '*.pyc' -exec rm {} +
 find . -name '__pycache__' -exec rm -rf {} +
 
 docker run --rm -i $TEST_IMAGE --version
-docker run --rm -i --entrypoint ''  -v `pwd`:/test -w /test  \
-    $TEST_IMAGE bash -c 'cp -r /test /tmp && cd /tmp/test/ && pip install tox && tox && cp .coverage /test'
+docker run --rm --entrypoint ''  \
+    -v `pwd`:/test -w /test  \
+    $TEST_IMAGE bash -c 'cp -r /test /click_mergevcfs && cd /click_mergevcfs && pip install tox && tox && cp .coverage /test'
 
 # move container coverage paths to local, see .coveragerc [paths] and this comment:
 # https://github.com/pytest-dev/pytest-cov/issues/146#issuecomment-272971136

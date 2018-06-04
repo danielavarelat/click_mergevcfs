@@ -114,3 +114,6 @@ venv.bak/
 
 # OS stuff
 .DS_Store
+
+# pytest_cache
+.pytest_cache/
