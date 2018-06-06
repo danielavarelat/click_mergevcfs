@@ -96,7 +96,7 @@ def test_run_flagging(tmpdir):
 
     # Test flagging
     perl_path = utils.which("perl")
-    print perl_path
+    print(perl_path)
     ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..',
                                         'click_mergevcfs'))
     flag_script = os.path.join(ROOT, "cgpFlagCaVEMan_custom.pl")

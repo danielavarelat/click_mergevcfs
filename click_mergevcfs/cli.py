@@ -112,7 +112,7 @@ def main(vcf, out, snv, indel, reference, caveman_flagged_out, pindel_flag,
     """click_mergevcfs main command."""
     if not os.path.isdir(temp):
         os.makedirs(temp)
-    print "Temp directory is {}".format(temp)
+    print("Temp directory is {}".format(temp))
     outdir = os.path.dirname(os.path.abspath(out))
 
     # TODO check if the working directory is the same as input directory

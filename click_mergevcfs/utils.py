@@ -21,17 +21,17 @@ def get_caller(in_vcf):
     # Potential problem if file is too big
     content = vcf.read().lower()
     # Caveman files may contain 'pindel.germline.bed', Temporary fix
-    content = content.replace('pindel.germline.bed', 'pindl.germline.bed')
+    content = content.replace(b'pindel.germline.bed', b'pindl.germline.bed')
 
     callers = ['mutect', 'strelka', 'mutect', 'caveman', 'pindel', 'brass']
-    caller = set([c for c in callers if c in content])
+    caller = set([c for c in callers if c.encode('utf-8') in content])
 
     if len(caller) != 1:
         sample_name = os.path.basename(in_vcf).split(".vcf")[0]
         print ("Unable to determine caller of {}: None or 1+ callers found. "
                "Using sample name {}.").format(in_vcf, sample_name)
         return sample_name
-    print "{} is produced by {}".format(in_vcf, list(caller)[0])
+    print("{} is produced by {}".format(in_vcf, list(caller)[0]))
     return list(caller)[0]
 
 
@@ -78,8 +78,12 @@ def decompose_multiallelic_record(in_vcf, out_vcf):
         number_events = len(record.alts)
         # Only mutect put multiple ALTS in one record
         if number_events > 1:
-            print "file={},pos={}".format(in_vcf, record.pos)
+            print("file={},pos={}".format(in_vcf, record.pos))
             for i in range(0, number_events):
+                # Temporary fix due to segfault
+                # see https://github.com/leukgen/click_mergevcfs/issues/2
+                if len(record.samples[0]['AF']) >= 8:
+                    continue
                 new_rec = record.copy()
                 new_rec.alts = tuple([record.alts[i]])
                 # Mutliallic sites GT are ex. 0/1/2, which causes error later
@@ -187,7 +191,7 @@ def add_version(in_vcf):
     lines.insert(1, "##click_mergevcfs={}\n".format(__version__))
     with open(temp.name, 'w') as fout:
         for l in lines:
-            fout.write(l)
+            fout.write(l.decode("utf-8") if isinstance(l, bytes) else l)
     subprocess.check_call(["bgzip", temp.name])
     shutil.move(temp.name+".gz", in_vcf)
 
