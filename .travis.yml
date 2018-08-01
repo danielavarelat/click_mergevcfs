@@ -9,7 +9,7 @@ services:
 install:
 - pip install -U tox-travis codecov
 script:
-- travis_wait 20 bash test-container.sh
+- travis_wait 40 bash test-container.sh
 after_success:
 - codecov --disable search
 deploy:
