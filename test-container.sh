@@ -24,7 +24,7 @@ echo "testing docker image..."
 find . -name '*.pyc' -exec rm {} +
 find . -name '__pycache__' -exec rm -rf {} +
 
-docker run --rm -i $TEST_IMAGE --version
+docker run --rm $TEST_IMAGE --version
 docker run --rm --entrypoint ''  \
     -v `pwd`:/test -w /test  \
     $TEST_IMAGE bash -c 'cp -r /test /click_mergevcfs && cd /click_mergevcfs && pip install tox && tox && cp .coverage /test'
