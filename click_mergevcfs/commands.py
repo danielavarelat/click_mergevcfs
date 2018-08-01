@@ -6,11 +6,22 @@ import tempfile
 import shutil
 
 from click_mergevcfs.utils import get_caller, parse_header, is_gz_file, \
-     decompose_multiallelic_record, add_PASSED_field, add_version
+     decompose_multiallelic_record, add_PASSED_field, add_version, \
+     order_mutect_samples
 
 
 def merge_snvs(vcf_list, out_file, working_dir):
     """For merging snvs and indels."""
+    # If a mutect vcf sample order is not NORMAL TUMOR, reorder the vcf
+    # pylint: disable=consider-using-enumerate
+    for i in range(0, len(vcf_list)):
+        if get_caller(vcf_list[i]) == 'mutect':
+            vcf_base_filename = os.path.basename(vcf_list[i])
+            src = order_mutect_samples(vcf_list[i])
+            dst = os.path.join(working_dir, vcf_base_filename)
+            shutil.copyfile(src, dst)
+            vcf_list[i] = dst
+
     working_dir_vcf_list = []
     for vcf in vcf_list:
         vcf_base_filename = os.path.basename(vcf)

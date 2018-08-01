@@ -18,4 +18,5 @@ TEST = {
     "indelBed": join(DATA, "indel.germline.bed"),
     "annoBedLoc": join(DATA, "annotable_region"),
     "unmatchedVCFLoc": join(DATA, "pon"),
+    "wrong_order_mutect_vcf": join(DATA, "snvs", "test_order_mutect_samples.vcf.gz"),
 }

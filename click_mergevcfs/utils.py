@@ -8,8 +8,55 @@ import binascii
 import subprocess
 import tempfile
 import pysam
+import pandas as pd
 
 from click_mergevcfs import __version__
+
+def order_mutect_samples(in_vcf_gz):
+    """Order the mutect output vcf sample columns as Normal Tumor."""
+    def switch_last_two_order(list_of_string):
+        return list_of_string[:-2] + list_of_string[-1:] + list_of_string[-2:-1]
+
+    def normal_tumor(column_names):
+        if 'N' in column_names[-2:-1][0] and 'T' in column_names[-1:][0]:
+            return True
+        return False
+
+    with gzip.open(in_vcf_gz, 'r') as f:
+        lines = [l.decode('UTF-8') for l in f.read().splitlines()]
+
+    # find the line number of the header
+    n = 0
+    for l in lines:
+        if l.startswith("#CHROM"):
+            break
+        n += 1
+
+    header = lines[:(n+1)]
+    old_df = pd.read_csv(in_vcf_gz, sep='\t', header=n)
+
+    column_names = list(old_df)
+    if not normal_tumor(column_names):
+        # switch the last two columns
+        new_column_order = switch_last_two_order(column_names)
+        new_df = old_df[new_column_order]
+
+        # change the order in the header
+        header[-1] = '\t'.join(
+            switch_last_two_order(header[-1:][0].split('\t')))
+
+        temp_file = tempfile.mkstemp()[1]
+        with open(temp_file, 'w') as f:
+            for l in header:
+                f.write(l+'\n')
+            new_df.to_csv(f, sep='\t', index=False, header=False)
+
+        subprocess.check_call(['bgzip', temp_file])
+
+        return temp_file + '.gz'
+
+    return in_vcf_gz
+
 
 def get_caller(in_vcf):
     """Determine which caller produced a given vcf file."""
@@ -23,7 +70,7 @@ def get_caller(in_vcf):
     # Caveman files may contain 'pindel.germline.bed', Temporary fix
     content = content.replace(b'pindel.germline.bed', b'pindl.germline.bed')
 
-    callers = ['mutect', 'strelka', 'mutect', 'caveman', 'pindel', 'brass']
+    callers = ['mutect', 'strelka', 'caveman', 'pindel']
     caller = set([c for c in callers if c.encode('utf-8') in content])
 
     if len(caller) != 1:
@@ -49,10 +96,13 @@ def add_PASSED_field(in_vcf, out_vcf):
 
     i_vcf = pysam.VariantFile(in_vcf, 'rb')
     new_header = i_vcf.header.copy()
-    new_header.info.add('PASSED_{}'.format(caller), '.', 'Flag',
-                        "this variants passed which caller(s)")
-    i_vcf.header.info.add('PASSED_{}'.format(caller), '.', 'Flag',
-                          "this variants passed which caller(s)")
+    try:
+        new_header.info.add('PASSED_{}'.format(caller), '.', 'Flag',
+                            "this variants passed which caller(s)")
+        i_vcf.header.info.add('PASSED_{}'.format(caller), '.', 'Flag',
+                              "this variants passed which caller(s)")
+    except ValueError:
+        pass
 
     raw_out = out_vcf.strip('.gz')
     o_vcf = pysam.VariantFile(raw_out, 'w', header=new_header)
@@ -136,21 +186,6 @@ def decompose_multiallelic_record(in_vcf, out_vcf):
 def get_ref(reference, chrom, pos):
     """Return the reference base at a given genomic position."""
     return reference.fetch(chrom, start=int(pos)-1, end=int(pos))
-
-
-def get_alt(alt, ref, chrom, pos):
-    """Return BND ALT."""
-    if alt == "<DEL>":
-        return "{}[{}:{}[".format(ref, chrom, pos)
-    if alt == "<DUP>":
-        return "]{}:{}]{}".format(chrom, pos, ref)
-
-    # if this a inversion
-    if alt[0] == '[':
-        return alt[:-1] + ref
-    if alt[-1] == ']':
-        return ref + alt[1:]
-    return alt
 
 
 def parse_header(vcf, callers):

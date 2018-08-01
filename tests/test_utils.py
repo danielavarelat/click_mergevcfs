@@ -9,10 +9,23 @@ import pysam
 from click_mergevcfs import utils
 from .utils import TEST
 
-# def test_tra2bnd(tmpdir):
-# TODO find a variant that is both in smoove and another tra caller.
-# run tra2bnd on smoove and compare
-# TODO test if run tra2bnd on bnd vcf, the result is valid
+
+def test_order_mutect_samples(tmpdir):
+    in_vcf = TEST['wrong_order_mutect_vcf']
+    out_vcf = utils.order_mutect_samples(in_vcf)
+    with gzip.open(out_vcf, 'r') as fin:
+        lines = [l.decode('UTF-8') for l in fin.read().splitlines()]
+    header_line = [l for l in lines if l.startswith('#CHROM')][0]
+    assert 'N' in header_line.split('\t')[-2:-1][0]
+    assert 'T' in header_line.split('\t')[-1:][0]
+
+    vcf = pysam.VariantFile(out_vcf)
+    for v in vcf:
+        normal = list(v.samples)[0]
+        tumor = list(v.samples)[1]
+        normal_af = v.samples[normal]['AF'][0]
+        tumor_af = v.samples[tumor]['AF'][0]
+        assert normal_af < tumor_af
 
 
 def test_decompose_multiallelic_record(tmpdir):
