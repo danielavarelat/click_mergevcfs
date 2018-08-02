@@ -653,8 +653,8 @@ sub runFlagger{
 	}elsif($flagName eq 'singleEndFlag'){
 		#SINGLE STRAND
 		return $flagger->getSingleEndResult();
-	}elsif($flagName eq 'matchedNormalProportion'){
-		return $flagger->getMatchedNormalProportionResult();
+	# }elsif($flagName eq 'matchedNormalProportion'){
+	# 	return $flagger->getMatchedNormalProportionResult();
 	}else{
 		croak("Unrecognised flag name $flagName\n");
 	}
