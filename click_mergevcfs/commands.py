@@ -20,7 +20,9 @@ def merge_snvs(vcf_list, out_file, working_dir):
             src = order_mutect_samples(vcf_list[i])
             dst = os.path.join(working_dir, vcf_base_filename)
             shutil.copyfile(src, dst)
-            vcf_list[i] = dst
+            temp = list(vcf_list)
+            temp[i] = dst
+            vcf_list = list(temp)
 
     working_dir_vcf_list = []
     for vcf in vcf_list:
