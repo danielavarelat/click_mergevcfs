@@ -138,6 +138,7 @@ def main(vcf, out, snv, indel, reference, caveman_flagged_out, pindel_flag,
             flag_script=flag_script,
             in_vcf=out,
             out_vcf=caveman_flagged_out,
+            bin_size=10000,
             normal_bam=normal_bam,  # -n
             tumor_bam=tumor_bam,  # -m
             bedFileLoc=bedfileloc,  # -b

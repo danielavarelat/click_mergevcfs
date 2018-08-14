@@ -78,7 +78,8 @@ def merge_snvs(vcf_list, out_file, working_dir):
 
 def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
                         tumor_bam, bedFileLoc, indelBed, unmatchedVCFLoc,
-                        reference, flagConfig, flagToVcfConfig, annoBedLoc):
+                        reference, flagConfig, flagToVcfConfig, annoBedLoc,
+                        bin_size):
     """Run caveman flagging on merged vcf."""
     def split_vcf(i_vcf, bin_size):
         """Split large vcf files into smaller files."""
@@ -136,7 +137,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         cmd = list(map(str, cmd))
         subprocess.check_call(cmd)
 
-    vcf_splitted_files = split_vcf(in_vcf, 100000)
+    vcf_splitted_files = split_vcf(in_vcf, bin_size)
 
     # Run flagging in parallel
     processes = []

@@ -19,4 +19,5 @@ TEST = {
     "annoBedLoc": join(DATA, "annotable_region"),
     "unmatchedVCFLoc": join(DATA, "pon"),
     "wrong_order_mutect_vcf": join(DATA, "snvs", "test_order_mutect_samples.vcf.gz"),
+    "expected_vcf": join(DATA, "snvs", "expected.merged.flagged.snv.vcf.gz"),
 }
