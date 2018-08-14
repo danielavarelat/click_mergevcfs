@@ -106,8 +106,9 @@ from click_mergevcfs import utils
     help="Path to bed files containing annotatable regions and coding regions."
 )
 @click.option(
-    "--bin_size",
+    "--bin-size",
     default=100000,
+    show_default=True,
     help=("Number of variants in a splitted vcf file in caveman flagging."
           "if bin_size > variants in input vcf, no parallization is applied.")
 )

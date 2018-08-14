@@ -81,6 +81,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
                         reference, flagConfig, flagToVcfConfig, annoBedLoc,
                         bin_size):
     """Run caveman flagging on merged vcf."""
+    print("bin_size={}".format(bin_size))
     def split_vcf(i_vcf, bin_size):
         """Split large vcf files into smaller files."""
         with gzip.open(i_vcf, 'r') as f_in:
@@ -164,3 +165,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
     if out_vcf.endswith('.gz'):
         subprocess.check_call(['bgzip', out_vcf])
         shutil.move(out_vcf+'.gz', out_vcf)
+
+    # Remove temp split vcf files
+    for vcf in flagged_vcfs:
+        shutil.remove(vcf)
