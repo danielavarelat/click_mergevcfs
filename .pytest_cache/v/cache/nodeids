@@ -1,5 +1,10 @@
 [
-  "tests/test_commands.py::test_run", 
+  "tests/test_cli.py::test_main", 
+  "tests/test_commands.py::test_run_snvs", 
+  "tests/test_commands.py::test_run_indels", 
+  "tests/test_commands.py::test_run_flagging", 
+  "tests/test_utils.py::test_order_mutect_samples", 
+  "tests/test_utils.py::test_decompose_multiallelic_record", 
   "tests/test_utils.py::test_parse_header", 
   "tests/test_utils.py::test_force_symlink", 
   "tests/test_utils.py::test_force_symlink_overwrite", 

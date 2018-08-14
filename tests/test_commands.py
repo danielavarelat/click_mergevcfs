@@ -122,3 +122,5 @@ def test_run_flagging(tmpdir):
 
     # Test if the flagged vcf is gziped
     assert utils.is_gz_file(flagged_vcf)
+
+    # Test to see if split is correct
