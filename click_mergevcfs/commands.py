@@ -168,4 +168,4 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
 
     # Remove temp split vcf files
     for vcf in flagged_vcfs:
-        shutil.remove(vcf)
+        os.remove(vcf)
