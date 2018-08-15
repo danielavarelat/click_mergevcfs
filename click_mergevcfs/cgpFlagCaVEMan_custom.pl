@@ -163,10 +163,10 @@ sub main{
 			warn "Performing germline indel intersect\n" if($opts->{'loud'});
 			getIntersectMatches($opts->{'f'},$indelBed,$GERMLINE_INDEL_HIT_KEY);
 		}
-		if(grep(/annotationFlag/,@$flagList)){
-			warn "Performing annotatable intersect\n" if($opts->{'loud'});
-			getIntersectMatches($opts->{'f'},$annoBed,$ANNOTATABLE_HIT_KEY);
-		}
+		# if(grep(/annotationFlag/,@$flagList)){
+		# 	warn "Performing annotatable intersect\n" if($opts->{'loud'});
+		# 	getIntersectMatches($opts->{'f'},$annoBed,$ANNOTATABLE_HIT_KEY);
+		# }
 		if(grep(/codingFlag/,@$flagList)){
 			warn "Performing coding intersect\n" if($opts->{'loud'});
 			getIntersectMatches($opts->{'f'},$codingBed,$CODING_ANNOTATION_HIT_KEY);
@@ -620,12 +620,12 @@ sub runFlagger{
 	}elsif($flagName eq 'phasingFlag'){
 		#PHASING
 		return $flagger->getPhasingResult();
-	}elsif($flagName eq 'annotationFlag'){
-		#ANNOTATION
-		if(exists($intersectFlagStore->{$coord}->{$ANNOTATABLE_HIT_KEY})){
-			return 1;
-		}
-		return 0;
+	# }elsif($flagName eq 'annotationFlag'){
+	# 	#ANNOTATION
+	# 	if(exists($intersectFlagStore->{$coord}->{$ANNOTATABLE_HIT_KEY})){
+	# 		return 1;
+	# 	}
+	# 	return 0;
 	}elsif($flagName eq 'hiSeqDepthFlag'){
 		#HIGH SEQ DEPTH
 		if(exists($intersectFlagStore->{$coord}->{$HIGH_SEQ_DEPTH_HIT_KEY})){
@@ -739,15 +739,15 @@ sub setupFromConfig{
 		}
 	}
 
-	if(grep(/annotationFlag/,@$flagList)){
-		if(!defined($bedFileParams->{$ANNO_BED_PARAMETER})){
-			push(@errs,"Found no file path to annotatable bed file. Set ".$ANNO_BED_PARAMETER." in the config input\n");
-		}
-		$annoBed = $opts->{'ab'}.'/'.$bedFileParams->{$ANNO_BED_PARAMETER};
-		if(! -e $annoBed){
-			push(@errs,"Specified bed file does not exist: $annoBed\n");
-		}
-	}
+	# if(grep(/annotationFlag/,@$flagList)){
+	# 	if(!defined($bedFileParams->{$ANNO_BED_PARAMETER})){
+	# 		push(@errs,"Found no file path to annotatable bed file. Set ".$ANNO_BED_PARAMETER." in the config input\n");
+	# 	}
+	# 	$annoBed = $opts->{'ab'}.'/'.$bedFileParams->{$ANNO_BED_PARAMETER};
+	# 	if(! -e $annoBed){
+	# 		push(@errs,"Specified bed file does not exist: $annoBed\n");
+	# 	}
+	# }
 
 	if(grep(/codingFlag/,@$flagList)){
 		if(!defined($bedFileParams->{$CODING_BED_PARAMETER})){
