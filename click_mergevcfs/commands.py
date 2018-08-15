@@ -149,14 +149,16 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         dir=working_dir
     )
     vcf_splitted_files, expected_num_file = split_vcf(in_vcf, bin_size, temp_dir)
-    print("splitted into {} files, temp_dir is {}".format(expected_num_file, temp_dir))
+    print("split to {} vcfs, temp_dir is {}".format(expected_num_file, temp_dir))
 
     # Run flagging in parallel
     processes = []
     for vcf in vcf_splitted_files:
-        processes.append(multiprocessing.Process(
-            target=run_flagging,
-            args=(vcf+'.gz', temp_dir))
+        processes.append(
+            multiprocessing.Process(
+                target=run_flagging,
+                args=(vcf+'.gz', temp_dir)
+            )
         )
     print("start multiprocessing...")
     for p in processes:
@@ -165,7 +167,9 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         p.join()
 
     # Before merging, check if all split jobs exist
-    split_flagged_files = [f for f in os.listdir(temp_dir) if (f.startswith('flagged_split_') & f.endswith('.vcf.gz'))]
+    split_flagged_files = [f for f in os.listdir(temp_dir)
+                           if (f.startswith('flagged_split_') &
+                               f.endswith('.vcf.gz'))]
     print("{}, {}".format(len(split_flagged_files), expected_num_file))
     assert len(split_flagged_files) == expected_num_file
 
@@ -186,7 +190,10 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
     fout.close()
 
     fout = open(out_vcf, 'w')
-    subprocess.check_call(['vcf-sort', unsorted_merged_temp_file.name], stdout=fout)
+    subprocess.check_call(
+        ['vcf-sort', unsorted_merged_temp_file.name],
+        stdout=fout
+    )
     fout.close()
 
     if out_vcf.endswith('.gz'):
