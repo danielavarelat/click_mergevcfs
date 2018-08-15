@@ -81,7 +81,6 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
                         reference, flagConfig, flagToVcfConfig, annoBedLoc,
                         bin_size):
     """Run caveman flagging on merged vcf."""
-    print("bin_size={}".format(bin_size))
     def split_vcf(i_vcf, bin_size):
         """Split large vcf files into smaller files."""
         with gzip.open(i_vcf, 'r') as f_in:
@@ -89,11 +88,15 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         header = [l for l in lines if l.startswith('#')]
         records = [l for l in lines if not l.startswith('#')]
         result = []
+        temp_dir = tempfile.mkdtemp(
+            prefix=os.path.basename(i_vcf).split('.vcf')[0]
+        )
         for x in range(0, len(records), bin_size):
             end = min(len(records), x+bin_size)
             split_vcf_file = tempfile.NamedTemporaryFile(
                 prefix='split_',
                 suffix='.vcf',
+                dir=temp_dir,
                 delete=False
             )
             result.append(split_vcf_file.name)
@@ -105,7 +108,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         for vcf in result:
             subprocess.check_call(['bgzip', '-f', vcf])
             subprocess.check_call(['tabix', '-f', '-p', 'vcf', vcf+'.gz'])
-        return result
+        return (result, len(range(0, len(records), bin_size)), temp_dir)
 
     def run_flagging(i_vcf, flagged_vcfs):
         """Run caveman flagging."""
@@ -138,7 +141,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         cmd = list(map(str, cmd))
         subprocess.check_call(cmd)
 
-    vcf_splitted_files = split_vcf(in_vcf, bin_size)
+    vcf_splitted_files, expected_num_file, temp_dir = split_vcf(in_vcf, bin_size)
 
     # Run flagging in parallel
     processes = []
@@ -150,6 +153,9 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         p.start()
     for p in processes:
         p.join()
+
+    # Before merging, check if all split jobs exist
+    assert len(os.listdir(temp_dir)) == (expected_num_file * 2) # times 2 b/c tbi
 
     # merge vcfs in flagged_vcfs
     cmd = ['vcf-merge']
