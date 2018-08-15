@@ -103,12 +103,14 @@ def test_run_flagging(tmpdir):
     flagConfig = os.path.join(ROOT, "flag.vcf.custom.config.ini")
     flagToVcfConfig = os.path.join(ROOT, "flag.to.vcf.custom.convert.ini")
     flagged_vcf = os.path.join(outdir, "merged.flagged.snv.vcf.gz")
+    expected_flaggd_vcf = TEST['expected_vcf']
 
     commands.caveman_postprocess(
         perl_path=perl_path,
         flag_script=flag_script,
         in_vcf=snvs_merged,
         out_vcf=flagged_vcf,
+        bin_size=300, # small bin_size for testing correctness of parallizing
         normal_bam=normal_bam,
         tumor_bam=tumor_bam,
         bedFileLoc=bedFileLoc,
@@ -122,3 +124,16 @@ def test_run_flagging(tmpdir):
 
     # Test if the flagged vcf is gziped
     assert utils.is_gz_file(flagged_vcf)
+
+    # Test to see if split is correct
+    with gzip.open(expected_flaggd_vcf) as f:
+        lines = f.readlines()
+    variants = [l for l in lines if not l.startswith('#')]
+    expected_num_variants = len(variants)
+
+    with gzip.open(flagged_vcf) as f:
+        lines = f.readlines()
+    variants = [l for l in lines if not l.startswith('#')]
+    obs_num_variants = len(variants)
+
+    assert expected_num_variants == obs_num_variants
