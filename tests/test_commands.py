@@ -86,12 +86,13 @@ def test_run_indels(tmpdir):
 
 def test_run_flagging(tmpdir):
     outdir = tmpdir.strpath
-    os.makedirs(os.path.join(outdir, "workingdir", "flagging"))
+    flagging_temp_dir = os.path.join(outdir, "workingdir", "flagging")
+    os.makedirs(flagging_temp_dir)
     snvs_merged = os.path.join(outdir, "merged.snvs.vcf.gz")
     commands.merge_snvs(
         vcf_list=snvs_vcf,
         out_file=snvs_merged,
-        working_dir=os.path.join(outdir, "workingdir", "flagging")
+        working_dir=flagging_temp_dir
     )
 
     # Test flagging
@@ -111,6 +112,7 @@ def test_run_flagging(tmpdir):
         in_vcf=snvs_merged,
         out_vcf=flagged_vcf,
         bin_size=300, # small bin_size for testing correctness of parallizing
+        working_dir=flagging_temp_dir,
         normal_bam=normal_bam,
         tumor_bam=tumor_bam,
         bedFileLoc=bedFileLoc,
