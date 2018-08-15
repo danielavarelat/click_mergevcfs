@@ -79,18 +79,16 @@ def merge_snvs(vcf_list, out_file, working_dir):
 def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
                         tumor_bam, bedFileLoc, indelBed, unmatchedVCFLoc,
                         reference, flagConfig, flagToVcfConfig, annoBedLoc,
-                        bin_size):
+                        bin_size, working_dir):
     """Run caveman flagging on merged vcf."""
-    def split_vcf(i_vcf, bin_size):
+    def split_vcf(i_vcf, bin_size, temp_dir):
         """Split large vcf files into smaller files."""
         with gzip.open(i_vcf, 'r') as f_in:
             lines = [l.decode() for l in f_in.readlines()]
         header = [l for l in lines if l.startswith('#')]
         records = [l for l in lines if not l.startswith('#')]
         result = []
-        temp_dir = tempfile.mkdtemp(
-            prefix=os.path.basename(i_vcf).split('.vcf')[0]
-        )
+
         for x in range(0, len(records), bin_size):
             end = min(len(records), x+bin_size)
             split_vcf_file = tempfile.NamedTemporaryFile(
@@ -108,16 +106,17 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         for vcf in result:
             subprocess.check_call(['bgzip', '-f', vcf])
             subprocess.check_call(['tabix', '-f', '-p', 'vcf', vcf+'.gz'])
-        return (result, len(range(0, len(records), bin_size)), temp_dir)
+        print("splitted files are: {}".format(result))
+        return (result, len(range(0, len(records), bin_size)))
 
-    def run_flagging(i_vcf, flagged_vcfs):
+    def run_flagging(i_vcf, temp_dir):
         """Run caveman flagging."""
         o_vcf = tempfile.NamedTemporaryFile(
-            prefix='split_flagged_',
+            prefix='flagged_{}'.format(os.path.basename(i_vcf).strip('.vcf.gz')),
             suffix='.vcf',
+            dir=temp_dir,
             delete=False
         )
-        flagged_vcfs.append(o_vcf.name)
 
         cmd = [
             perl_path,
@@ -141,37 +140,58 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         cmd = list(map(str, cmd))
         subprocess.check_call(cmd)
 
-    vcf_splitted_files, expected_num_file, temp_dir = split_vcf(in_vcf, bin_size)
+        # gzip and create tbi
+        subprocess.check_call(['bgzip', '-f', o_vcf.name])
+        subprocess.check_call(['tabix', '-f', '-p', 'vcf', o_vcf.name+'.gz'])
+
+    temp_dir = tempfile.mkdtemp(
+        prefix=os.path.basename(in_vcf).split('.vcf')[0],
+        dir=working_dir
+    )
+    vcf_splitted_files, expected_num_file = split_vcf(in_vcf, bin_size, temp_dir)
+    print("splitted into {} files, temp_dir is {}".format(expected_num_file, temp_dir))
 
     # Run flagging in parallel
     processes = []
-    flagged_vcfs = multiprocessing.Manager().list()
     for vcf in vcf_splitted_files:
-        processes.append(multiprocessing.Process(target=run_flagging,
-                                                 args=(vcf+'.gz', flagged_vcfs)))
+        processes.append(multiprocessing.Process(
+            target=run_flagging,
+            args=(vcf+'.gz', temp_dir))
+        )
+    print("start multiprocessing...")
     for p in processes:
         p.start()
     for p in processes:
         p.join()
 
     # Before merging, check if all split jobs exist
-    assert len(os.listdir(temp_dir)) == (expected_num_file * 2) # times 2 b/c tbi
+    split_flagged_files = [f for f in os.listdir(temp_dir) if (f.startswith('flagged_split_') & f.endswith('.vcf.gz'))]
+    print("{}, {}".format(len(split_flagged_files), expected_num_file))
+    assert len(split_flagged_files) == expected_num_file
 
     # merge vcfs in flagged_vcfs
-    cmd = ['vcf-merge']
-    for vcf in flagged_vcfs:
-        subprocess.check_call(['bgzip', '-f', vcf])
-        subprocess.check_call(['tabix', '-f', '-p', 'vcf', vcf+'.gz'])
-        cmd.extend([vcf+'.gz'])
-    cmd = list(map(str, cmd))
+    print("start merging...")
+    merge_cmd = ['vcf-merge']
+    for vcf in split_flagged_files:
+        merge_cmd.extend([os.path.join(temp_dir, vcf)])
+    merge_cmd = list(map(str, merge_cmd))
+    unsorted_merged_temp_file = tempfile.NamedTemporaryFile(
+        prefix='unsorted',
+        suffix='.vcf',
+        dir=temp_dir,
+        delete=False
+    )
+    fout = open(unsorted_merged_temp_file.name, 'w')
+    subprocess.check_call(merge_cmd, stdout=fout)
+    fout.close()
+
     fout = open(out_vcf, 'w')
-    subprocess.check_call(cmd, stdout=fout)
+    subprocess.check_call(['vcf-sort', unsorted_merged_temp_file.name], stdout=fout)
     fout.close()
 
     if out_vcf.endswith('.gz'):
         subprocess.check_call(['bgzip', out_vcf])
         shutil.move(out_vcf+'.gz', out_vcf)
 
-    # Remove temp split vcf files
-    for vcf in flagged_vcfs:
-        os.remove(vcf+'.gz')
+    print("removing temp_dir...")
+    shutil.rmtree(temp_dir, ignore_errors=True)
