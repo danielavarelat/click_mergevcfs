@@ -144,6 +144,20 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         subprocess.check_call(['bgzip', '-f', o_vcf.name])
         subprocess.check_call(['tabix', '-f', '-p', 'vcf', o_vcf.name+'.gz'])
 
+    def concat_vcfs(vcfs, out_vcf):
+        """Concatnating a list of vcf files into one vcf."""
+        result = []
+        for vcf in vcfs:
+            with gzip.open(vcf, 'r') as f:
+                lines = f.readlines()
+                headers = [l.decode() for l in lines if l.startswith(b'#')]
+                variants = [l.decode() for l in lines if not l.startswith(b'#')]
+            result.extend(variants)
+
+        with open(out_vcf, 'w') as f:
+            f.write(''.join(headers))
+            f.write(''.join(result))
+
     temp_dir = tempfile.mkdtemp(
         prefix=os.path.basename(in_vcf).split('.vcf')[0],
         dir=working_dir
@@ -167,7 +181,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
         p.join()
 
     # Before merging, check if all split jobs exist
-    split_flagged_files = [f for f in os.listdir(temp_dir)
+    split_flagged_files = [os.path.join(temp_dir, f) for f in os.listdir(temp_dir)
                            if (f.startswith('flagged_split_') &
                                f.endswith('.vcf.gz'))]
     print("{}, {}".format(len(split_flagged_files), expected_num_file))
@@ -175,30 +189,24 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
 
     # merge vcfs in flagged_vcfs
     print("start merging...")
-    merge_cmd = ['vcf-merge']
-    for vcf in split_flagged_files:
-        merge_cmd.extend([os.path.join(temp_dir, vcf)])
-    merge_cmd = list(map(str, merge_cmd))
-    unsorted_merged_temp_file = tempfile.NamedTemporaryFile(
+    unsorted_merged_vcf = tempfile.NamedTemporaryFile(
         prefix='unsorted',
         suffix='.vcf',
         dir=temp_dir,
         delete=False
     )
-    fout = open(unsorted_merged_temp_file.name, 'w')
-    subprocess.check_call(merge_cmd, stdout=fout)
-    fout.close()
+    concat_vcfs(split_flagged_files, unsorted_merged_vcf.name)
 
-    fout = open(out_vcf, 'w')
+    unzipped_out_vcf = out_vcf.strip('.gz')
+    fout = open(unzipped_out_vcf, 'w')
     subprocess.check_call(
-        ['vcf-sort', unsorted_merged_temp_file.name],
+        ['vcf-sort', unsorted_merged_vcf.name],
         stdout=fout
     )
     fout.close()
 
-    if out_vcf.endswith('.gz'):
-        subprocess.check_call(['bgzip', out_vcf])
-        shutil.move(out_vcf+'.gz', out_vcf)
+    subprocess.check_call(['bgzip', '-f', unzipped_out_vcf])
+    subprocess.check_call(['tabix', '-f', '-p', 'vcf', out_vcf])
 
     print("removing temp_dir...")
     shutil.rmtree(temp_dir, ignore_errors=True)
