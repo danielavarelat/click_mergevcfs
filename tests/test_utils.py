@@ -15,9 +15,18 @@ def test_order_mutect_samples(tmpdir):
     out_vcf = utils.order_mutect_samples(in_vcf)
     with gzip.open(out_vcf, 'r') as fin:
         lines = [l.decode('UTF-8') for l in fin.read().splitlines()]
-    header_line = [l for l in lines if l.startswith('#CHROM')][0]
-    assert 'N' in header_line.split('\t')[-2:-1][0]
-    assert 'T' in header_line.split('\t')[-1:][0]
+    header_line_idx = [i for i, s in enumerate(lines) if s.startswith("#CHR")][0]
+    header_line = lines[header_line_idx]
+    header = lines[:(header_line_idx + 1)]
+
+    for h in header:
+        if h.startswith('##normal_sample='):
+            normal_sample = h.split('=')[1]
+        if h.startswith('##tumor_sample='):
+            tumor_sample = h.split('=')[1]
+
+    assert normal_sample == header_line.split('\t')[-2:-1][0]
+    assert tumor_sample == header_line.split('\t')[-1:][0]
 
     vcf = pysam.VariantFile(out_vcf)
     for v in vcf:

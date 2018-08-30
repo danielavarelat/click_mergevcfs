@@ -17,8 +17,9 @@ def order_mutect_samples(in_vcf_gz):
     def switch_last_two_order(list_of_string):
         return list_of_string[:-2] + list_of_string[-1:] + list_of_string[-2:-1]
 
-    def normal_tumor(column_names):
-        if 'N' in column_names[-2:-1][0] and 'T' in column_names[-1:][0]:
+    def is_normal_tumor(column_names, normal_sample, tumor_sample):
+        if normal_sample == column_names[-2:-1][0] \
+           and tumor_sample == column_names[-1:][0]:
             return True
         return False
 
@@ -26,17 +27,23 @@ def order_mutect_samples(in_vcf_gz):
         lines = [l.decode('UTF-8') for l in f.read().splitlines()]
 
     # find the line number of the header
-    n = 0
-    for l in lines:
-        if l.startswith("#CHROM"):
-            break
-        n += 1
+    header_line_idx = [i for i, s in enumerate(lines) if s.startswith("#CHR")][0]
 
-    header = lines[:(n+1)]
-    old_df = pd.read_csv(in_vcf_gz, sep='\t', header=n)
+    header = lines[:(header_line_idx + 1)]
+    old_df = pd.read_csv(in_vcf_gz, sep='\t', header=header_line_idx)
 
     column_names = list(old_df)
-    if not normal_tumor(column_names):
+    for h in header:
+        if h.startswith('##normal_sample='):
+            normal_sample = h.split('=')[1]
+        if h.startswith('##tumor_sample='):
+            tumor_sample = h.split('=')[1]
+
+    if not is_normal_tumor(column_names, normal_sample, tumor_sample):
+        print(
+            "tumor_sample {} and normal_sample {} are not in N T "
+            "order in {}".format(tumor_sample, normal_sample, in_vcf_gz)
+        )
         # switch the last two columns
         new_column_order = switch_last_two_order(column_names)
         new_df = old_df[new_column_order]
