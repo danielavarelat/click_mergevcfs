@@ -130,7 +130,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
             '-g', indelBed,
             '-umv', unmatchedVCFLoc,
             '-ref', reference + ".fai", # Reference index (fai) from caveman help
-            '-t', 'pulldown' if sequencing_method == 'TGD' else 'genome',
+            '-t', 'pulldown' if sequencing_method == 'TGD' else 'genomic',
             '-c', flagConfig,
             '-v', flagToVcfConfig,
             '-ab', annoBedLoc,
