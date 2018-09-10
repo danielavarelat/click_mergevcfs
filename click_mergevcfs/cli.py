@@ -112,10 +112,15 @@ from click_mergevcfs import utils
     help=("Number of variants in a splitted vcf file in caveman flagging."
           "if bin_size > variants in input vcf, no parallization is applied.")
 )
+@click.option(
+    "--sequencing_method",
+    default=False,
+    help="WGS or TGD"
+)
 @click.version_option(version=__version__)
 def main(vcf, out, snv, indel, reference, caveman_flagged_out, pindel_flag,
          temp, normal_bam, tumor_bam, bedfileloc, indelbed, unmatchedvcfloc,
-         annobedloc, bin_size):
+         annobedloc, bin_size, sequencing_method):
     """click_mergevcfs main command."""
     if not os.path.isdir(temp):
         os.makedirs(temp)
@@ -155,7 +160,8 @@ def main(vcf, out, snv, indel, reference, caveman_flagged_out, pindel_flag,
             reference=reference,
             flagConfig=flagConfig,
             flagToVcfConfig=flagToVcfConfig,
-            annoBedLoc=annobedloc  # -ab
+            annoBedLoc=annobedloc,  # -ab
+            sequencing_method=sequencing_method
         )
 
 

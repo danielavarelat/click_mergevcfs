@@ -79,7 +79,7 @@ def merge_snvs(vcf_list, out_file, working_dir):
 def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
                         tumor_bam, bedFileLoc, indelBed, unmatchedVCFLoc,
                         reference, flagConfig, flagToVcfConfig, annoBedLoc,
-                        bin_size, working_dir):
+                        bin_size, sequencing_method, working_dir):
     """Run caveman flagging on merged vcf."""
     def split_vcf(i_vcf, bin_size, temp_dir):
         """Split large vcf files into smaller files."""
@@ -130,7 +130,7 @@ def caveman_postprocess(perl_path, flag_script, in_vcf, out_vcf, normal_bam,
             '-g', indelBed,
             '-umv', unmatchedVCFLoc,
             '-ref', reference + ".fai", # Reference index (fai) from caveman help
-            '-t', 'pulldown',
+            '-t', 'pulldown' if sequencing_method == 'TGD' else 'genome',
             '-c', flagConfig,
             '-v', flagToVcfConfig,
             '-ab', annoBedLoc,

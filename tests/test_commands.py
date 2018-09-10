@@ -121,7 +121,8 @@ def test_run_flagging(tmpdir):
         reference=reference,
         flagConfig=flagConfig,
         flagToVcfConfig=flagToVcfConfig,
-        annoBedLoc=annoBedLoc
+        annoBedLoc=annoBedLoc,
+        sequencing_method='TGD'
         )
 
     # Test if the flagged vcf is gziped
