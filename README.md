@@ -8,6 +8,13 @@
 
 Merge vcfs files from multiple different callers.
 
+Due to different caller output vcf files have with slightly different formats, merging vcfs is not trivial; several steps need to be done before merging vcfs:
+ - First, the order of the last 2 columns in the output vcf of each callers must be NOMRAL TUMOR; if that's not the case (ex. mutect), click_mergevcfs will rearrange the column order.
+ - Second, multiallelic variants are formatted differently by each caller. For example, strelka's format is one REF, multiple ALT; mutect's format is one REF, one ALT, multiple records. click_mergevcfs will break mutliple ALT into multiple records each with one ALT.
+ - Then, click_mergevcfs will add PASSED_{caller} information under the INFO field if a record has the flag PASS. This is to distinguish passed variants once variants are merged from callers.
+ - Finally, vcf files are merged using `vcf-merge --collapse none vcf1 vcf2 vcf3`. This will ensure the output vcf keeps all conflicting calls. Headers are also formatted to include information from all callers.
+ - For SNVs only, we apply caveman flagging to all variants from all callers. This is done by calling an altered `cgpFlagCaVEMan.pl`, which was changed to accommmedate variants that are called by mutect/strelka that have zero supporting reads in the original bam because mutect/strelka does on-the-fly indel realginment. When flagging WGS vcfs, caveman flagging is implementated in a parallelized and memory-efficient manner to achieve reasonable runtime. It is done by spliting the input merged vcf into many smaller vcf, apply `cgpFlagCaVEMan.pl` in parallel, and concat output vcfs into one output vcf. Additional safety measures were implemented so that it only success if the number of variants in the output vcf is the same as that in the input vcf. All intermediate files are deleted.
+
 ## Installation
 
         pip install click_mergevcfs

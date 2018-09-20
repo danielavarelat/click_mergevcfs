@@ -133,7 +133,7 @@ def decompose_multiallelic_record(in_vcf, out_vcf):
 
     for record in i_vcf:
         number_events = len(record.alts)
-        # Only mutect put multiple ALTS in one record
+        # Only mutect put multiple ALTs in one record
         if number_events > 1:
             print("file={},pos={}".format(in_vcf, record.pos))
             for i in range(0, number_events):
@@ -197,7 +197,6 @@ def get_ref(reference, chrom, pos):
 
 def parse_header(vcf, callers):
     """Replace hard-to-read and ambiguious header with clear header."""
-    # TODO maybe instead of {}_Normal and {}_Tumor, do {}_{sample name}
     temp = tempfile.NamedTemporaryFile()
     header = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT"
     for c in callers:

@@ -127,7 +127,6 @@ def main(vcf, out, snv, indel, reference, caveman_flagged_out, pindel_flag,
     print("Temp directory is {}".format(temp))
     outdir = os.path.dirname(os.path.abspath(out))
 
-    # TODO check if the working directory is the same as input directory
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
@@ -138,7 +137,6 @@ def main(vcf, out, snv, indel, reference, caveman_flagged_out, pindel_flag,
         commands.merge_snvs(vcf_list=vcf, out_file=out, working_dir=temp)
 
     if caveman_flagged_out:
-        # TODO check parameter
         perl_path = utils.which('perl')
         ROOT = abspath(dirname(__file__))
         flag_script = join(ROOT, "cgpFlagCaVEMan_custom.pl")
