@@ -5,6 +5,7 @@
 [![codecov badge][codecov_badge]][codecov_base]
 [![docker badge][docker_badge]][docker_base]
 [![docker badge][automated_badge]][docker_base]
+[![code formatting][black_badge]][black_base]
 
 Merge vcfs files from multiple different callers.
 
@@ -89,3 +90,5 @@ This package was created using [Cookiecutter] and the
 [pypi_base]: https://pypi.python.org/pypi/click_mergevcfs
 [travis_badge]: https://img.shields.io/travis/leukgen/click_mergevcfs.svg
 [travis_base]: https://travis-ci.org/leukgen/click_mergevcfs
+[black_badge]: https://img.shields.io/badge/code%20style-black-000000.svg
+[black_base]: https://github.com/ambv/black
