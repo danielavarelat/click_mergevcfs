@@ -8,7 +8,7 @@ if [ "$1" = "--skip-build" ]; then
     echo "skipping build..."
 else
     echo "building image, to skip run with --skip-build"
-    docker build -q -t $TEST_IMAGE .
+    docker build -t $TEST_IMAGE .
 fi
 
 # see https://explainshell.com/explain?cmd=set+-euxo%20pipefail
@@ -25,7 +25,7 @@ find . -name '*.pyc' -exec rm {} +
 find . -name '__pycache__' -exec rm -rf {} +
 
 docker run --rm $TEST_IMAGE --version
-docker run --rm --entrypoint ''  \
+docker run --rm -t --entrypoint ''  \
     -v `pwd`:/test -w /test  \
     $TEST_IMAGE bash -c 'cp -r /test /click_mergevcfs && cd /click_mergevcfs && pip install tox && tox && cp .coverage /test'
 

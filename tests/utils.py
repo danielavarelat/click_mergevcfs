@@ -1,3 +1,4 @@
+"""Utils for tests."""
 from os.path import join, dirname, abspath
 
 ROOT = abspath(dirname(__file__))
@@ -18,7 +19,15 @@ TEST = {
     "indelBed": join(DATA, "indel.germline.bed"),
     "annoBedLoc": join(DATA, "annotable_region"),
     "unmatchedVCFLoc": join(DATA, "pon"),
-    "wrong_order_mutect_vcf": join(DATA, "snvs",
-                                   "test_order_mutect_samples.vcf.gz"),
+    "wrong_order_mutect_vcf": join(DATA, "snvs", "test_order_mutect_samples.vcf.gz"),
     "expected_vcf": join(DATA, "snvs", "expected.merged.flagged.snv.vcf.gz"),
+    "germline_strelka_snvs": join(DATA, "germline", "strelka.snvs.vcf.gz"),
+    "germline_strelka_indels": join(DATA, "germline", "strelka.indels.vcf.gz"),
+    "germline_freebayes_snvs": join(DATA, "germline", "freebayes.snvs.vcf.gz"),
+    "germline_freebayes_indels": join(DATA, "germline", "freebayes.indels.vcf.gz"),
 }
+
+
+def get_variant_lines(content):
+    """Count the number of variants."""
+    return len([v for v in content.strip().split("\n") if not v.startswith("#")])
