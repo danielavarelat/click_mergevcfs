@@ -130,3 +130,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# test-data
+output
