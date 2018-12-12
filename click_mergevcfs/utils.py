@@ -159,18 +159,18 @@ def decompose_multiallelic_record(in_vcf, out_vcf):
     o_vcf = VariantFile(raw_out, "w", header=i_vcf.header)
 
     for record in i_vcf:
-        number_events = len(record.alts)
         # Only mutect put multiple ALTs in one record
-        if number_events > 1:
+        number_events = len(record.alts)
+        # Temporary fix due to segfault
+        # see https://github.com/leukgen/click_mergevcfs/issues/2
+        if number_events >= 8:
+            continue
+        elif number_events > 1:
             click.echo("file={},pos={}".format(in_vcf, record.pos))
             for i in range(0, number_events):
-                # Temporary fix due to segfault
-                # see https://github.com/leukgen/click_mergevcfs/issues/2
-                if len(record.samples[0]["AF"]) >= 8:
-                    continue
                 new_rec = record.copy()
                 new_rec.alts = tuple([record.alts[i]])
-                # Mutliallic sites GT are ex. 0/1/2, which causes error later
+                # Multiallic sites GT are ex. 0/1/2, which causes error later
                 # Needs to change to ./.
                 genotypes = list(record.samples)
                 for g in genotypes:
