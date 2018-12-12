@@ -110,7 +110,7 @@ def main(
     bin_size,
     sequencing_method,
 ):
-    """click_mergevcfs main command."""
+    """Merge vcfs files from multiple different callers."""
     if not os.path.isdir(temp):
         os.makedirs(temp)
     click.echo("Temp directory is {}".format(temp))
